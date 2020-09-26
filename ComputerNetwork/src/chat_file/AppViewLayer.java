@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.sound.sampled.AudioFormat.Encoding;
 import javax.swing.*;
 
 import org.jnetpcap.Pcap;
@@ -18,7 +17,7 @@ import org.jnetpcap.PcapIf;
 import org.jnetpcap.packet.PcapPacket;
 import org.jnetpcap.packet.PcapPacketHandler;
 
-public class ChatFileDlg extends JFrame implements BaseLayer {
+public class AppViewLayer extends JFrame implements BaseLayer {
 	public int nUpperLayerCount = 0;
 	public String pLayerName = null;
 	public BaseLayer p_UnderLayer = null;
@@ -54,15 +53,15 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 	public static void main(String[] args) {
 		m_LayerMgr.AddLayer(new NILayer("NI"));
 		
-		m_LayerMgr.AddLayer(new ChatFileDlg("GUI"));
+		m_LayerMgr.AddLayer(new AppViewLayer("GUI"));
 
 		//m_LayerMgr.ConnectLayers( );
 	}
 
-	public ChatFileDlg(String pName) {
+	public AppViewLayer(String pName) {
 		
 		pLayerName = pName;
-		setTitle("Chatting & File Transfer");
+		setTitle("ARP");
 
 		setBounds(250, 250, 580, 400);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -156,7 +155,7 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 			public void actionPerformed(ActionEvent arg0) {
 				if (Setting_Button.getText() == "Reset") {
 
-					fd = new FileDialog(ChatFileDlg.this, "파일선택", FileDialog.LOAD);
+					fd = new FileDialog(AppViewLayer.this, "파일선택", FileDialog.LOAD);
 					fd.setVisible(true);
 
 					if (fd.getFile() != null) {
