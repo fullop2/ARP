@@ -4,6 +4,7 @@ import NetworkLayer.ApplicationLayer;
 import NetworkLayer.ChatAppLayer;
 import NetworkLayer.EthernetLayer;
 import NetworkLayer.FileAppLayer;
+import NetworkLayer.IPLayer;
 import NetworkLayer.LayerManager;
 import NetworkLayer.NILayer;
 
@@ -15,17 +16,18 @@ import EventHandlers.*;
 
 public class ApplicationController {
 	
+	
 	public void init() {
 		new AppView();
 		
 		LayerManager layerManager = new LayerManager();
 		layerManager.AddLayer(new NILayer("NI"));
 		layerManager.AddLayer(new EthernetLayer("Ethernet"));
+		layerManager.AddLayer(new IPLayer("IP"));
 		layerManager.AddLayer(new ChatAppLayer("Chat"));
 		layerManager.AddLayer(new FileAppLayer("File"));
 		layerManager.AddLayer(new ApplicationLayer("App"));
-
-		layerManager.ConnectLayers("NI ( *Ethernet ( *Chat ( *App ) *File ( *App ) ) )" );
+		layerManager.ConnectLayers("NI ( *Ethernet ( *IP ( *Chat ( *App ) *File ( *App ) ) )" );
 		
 		
 		// initialization event handler in here
