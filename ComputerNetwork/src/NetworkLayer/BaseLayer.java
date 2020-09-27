@@ -1,8 +1,8 @@
-package chat_file;
+package NetworkLayer;
 
 import java.util.ArrayList;
 
-interface BaseLayer {
+public interface BaseLayer {
 	public final int m_nUpperLayerCount = 0;
 	public final String m_pLayerName = null;
 	public final BaseLayer mp_UnderLayer = null;
