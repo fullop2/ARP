@@ -2,13 +2,13 @@ package NetworkLayer;
 
 import java.util.ArrayList;
 
-public class ARPLayer implements BaseLayer {
+public class IPLayer implements BaseLayer {
 	public int nUpperLayerCount = 0;
 	public String pLayerName = null;
 	public BaseLayer p_UnderLayer = null;
 	public ArrayList<BaseLayer> p_aUpperLayer = new ArrayList<BaseLayer>();
-
-	public ARPLayer(String string) {
+	
+	public IPLayer(String string) {
 		pLayerName = string;
 	}
 
