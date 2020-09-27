@@ -17,45 +17,45 @@ public class AppView extends JFrame{
 	static Container contentPane;
 	
 	/* Chat */
-	static JTextField chattingWrite;
-	static JTextArea chattingArea;
-	static JButton chatSendButton;
+	public static JTextField chattingWrite;
+	public static JTextArea chattingArea;
+	public static JButton chatSendButton;
 	
 	/* Address */
-	static JLabel lblSelectNic;
-	static JLabel lblsrcMAC;
-	static JLabel lblsrcIP;
+	public static JLabel lblSelectNic;
+	public static JLabel lblsrcMAC;
+	public static JLabel lblsrcIP;
 	
-	static JComboBox comboBox;
-	static JTextArea srcMacAddress;
-	static JTextField srcIPAddress;
+	public static JComboBox comboBox;
+	public static JTextArea srcMacAddress;
+	public static JTextField srcIPAddress;
 	
-	static JButton btnSetting;
+	public static JButton btnSetting;
 	
 	/* ARP Table */
-	static JTextArea ArpTable;
-	static JTextField ArpIP;
+	public static JTextArea ArpTable;
+	public static JTextField ArpIP;
 	
-	static JButton btnArpDeleteOne;
-	static JButton btnArpDeleteAll;
-	static JButton btnArpSend;
+	public static JButton btnArpDeleteOne;
+	public static JButton btnArpDeleteAll;
+	public static JButton btnArpSend;
 	
-	static JLabel lblArpIP;
+	public static JLabel lblArpIP;
 	
 	
 	/* Proxy ARP */
-	static JTextArea proxyArpEntry;
+	public static JTextArea proxyArpEntry;
 	
-	static JTextField proxyDevice;
-	static JTextField proxyInIP;
-	static JTextField proxyOutMAC;
+	public static JTextField proxyDevice;
+	public static JTextField proxyInIP;
+	public static JTextField proxyOutMAC;
 	
-	static JLabel lblProxyDevice;
-	static JLabel lblProxyInIP;
-	static JLabel lblProxyOutMAC;
+	public static JLabel lblProxyDevice;
+	public static JLabel lblProxyInIP;
+	public static JLabel lblProxyOutMAC;
 	
-	static JButton btnProxyAdd;
-	static JButton btnProxyDelete;
+	public static JButton btnProxyAdd;
+	public static JButton btnProxyDelete;
 	
 	
 	/* GARP */ 
@@ -123,7 +123,6 @@ public class AppView extends JFrame{
 		
 		return pane;
 	}
-	
 	
 	public JPanel addrPanel(int x, int y) {
 		JPanel pane = new JPanel();
@@ -267,7 +266,4 @@ public class AppView extends JFrame{
 		return pane;
 	}
 	
-	public static FileDialog getFileDialog() {
-		 return new FileDialog(appView, "파일선택", FileDialog.LOAD);
-	}
 }

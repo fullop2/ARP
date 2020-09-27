@@ -9,21 +9,11 @@ public class ApplicationLayer implements BaseLayer  {
 	public int nUpperLayerCount = 0;
 	public String pLayerName = null;
 	public BaseLayer p_UnderLayer = null;
-	public ArrayList<BaseLayer> p_aUpperLayer = new ArrayList<BaseLayer>();
-
-
-	private static LayerManager m_LayerMgr;
-
-	
+	public ArrayList<BaseLayer> p_aUpperLayer = new ArrayList<BaseLayer>();	
 	
 	public ApplicationLayer(String pName) {
 		pLayerName = pName;
 	}
-	
-	public static void SetLayerManager(LayerManager layerMgr) {
-		m_LayerMgr = layerMgr;
-	}
-	
 	
 	public boolean Receive(byte[] input) {
 		byte[] data = input;
