@@ -15,6 +15,7 @@
 - ARP Layer 구현
 - IP Layer 구현
 - Application Layer 구현
+- Application Controller에서 View의 GUI에 ActionListener 연결
 - (Optional) Chatting Layer 구현
 
 ##### 진행 상황
