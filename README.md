@@ -20,8 +20,9 @@
 ##### 진행 상황
 
 ###### 2020.09.27 
-  GUI 생성 및 프로젝트 MVC화
-  View의 각 Panel별 핸들러 분리
+  - GUI 생성 및 프로젝트 MVC화
+  - 모든 Layer 생성 및 LayerManager에서 레이어 연결
+  - View의 각 Panel별 핸들러 분리
 
 
 
