@@ -65,6 +65,10 @@ public class ARPLayer implements BaseLayer {
 	_ARP_HEADER m_sHeader = new _ARP_HEADER();
 	
 	
+	public ARPLayer(String string) {
+		pLayerName = string;
+	}
+  
 	@Override
 	public void SetUnderLayer(BaseLayer pUnderLayer) {
 		// TODO Auto-generated method stub
