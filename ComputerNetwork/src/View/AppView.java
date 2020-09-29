@@ -22,15 +22,7 @@ public class AppView extends JFrame{
 	public static JButton chatSendButton;
 	
 	/* Address */
-	public static JLabel lblSelectNic;
-	public static JLabel lblsrcMAC;
-	public static JLabel lblsrcIP;
 	
-	public static JComboBox comboBox;
-	public static JTextArea srcMacAddress;
-	public static JTextField srcIPAddress;
-	
-	public static JButton btnSetting;
 	
 	/* ARP Table */
 	public static JTextArea ArpTable;
@@ -79,24 +71,13 @@ public class AppView extends JFrame{
 		add(arpCachePanel(0,0));
 		add(proxyArpPanel(400, 0));
 		add(garpPanel(800,0));
-		add(addrPanel(800,150));
+		add(new AddressPanel(800,150));
+		
 		setVisible(true);
 
-		SetCombobox();
 	}
 
-	private void SetCombobox() {
-		List<PcapIf> m_pAdapterList = new ArrayList<PcapIf>();
-		StringBuilder errbuf = new StringBuilder();
 
-		int r = Pcap.findAllDevs(m_pAdapterList, errbuf);
-		if (r == Pcap.NOT_OK || m_pAdapterList.isEmpty()) {
-			System.err.printf("Can't read list of devices, error is %s", errbuf.toString());
-			return;
-		}
-		for (int i = 0; i < m_pAdapterList.size(); i++)
-			this.comboBox.addItem(m_pAdapterList.get(i).getDescription());
-	}
 	
 
 	public JPanel chatPanel(int x, int y) {
@@ -120,45 +101,6 @@ public class AppView extends JFrame{
 		chatSendButton = new JButton("Send");		
 		chatSendButton.setBounds(315,270,70,20);
 		pane.add(chatSendButton);
-		
-		return pane;
-	}
-	
-	public JPanel addrPanel(int x, int y) {
-		JPanel pane = new JPanel();
-		pane.setBounds(x,y,400,150);
-		pane.setBorder(BorderFactory.createTitledBorder("Address"));
-		pane.setLayout(null);
-		
-		lblSelectNic = new JLabel("NIC List");
-		lblSelectNic.setBounds(15,15,70,20);
-		pane.add(lblSelectNic);
-
-		comboBox = new JComboBox();
-		comboBox.setBounds(100,15,280,20);
-		pane.add(comboBox);
-		
-		lblsrcMAC = new JLabel("Mac Address");
-		lblsrcMAC.setBounds(15,45,70,20);
-		pane.add(lblsrcMAC);
-
-		srcMacAddress = new JTextArea();
-		srcMacAddress.setEditable(false);
-		srcMacAddress.setBounds(100,45,280,20);
-		pane.add(srcMacAddress);
-
-		lblsrcIP = new JLabel("IP Address");
-		lblsrcIP.setBounds(15,75,70,20);
-		pane.add(lblsrcIP);
-		
-		srcIPAddress = new JTextField();
-		srcIPAddress.setBounds(100,75,280,20);
-		pane.add(srcIPAddress);
-
-
-		btnSetting = new JButton("Setting");// setting
-		btnSetting.setBounds(160,105,80,20);
-		pane.add(btnSetting);
 		
 		return pane;
 	}

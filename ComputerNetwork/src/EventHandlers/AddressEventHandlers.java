@@ -10,9 +10,12 @@ import java.util.List;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 
+import org.jnetpcap.Pcap;
+import org.jnetpcap.PcapIf;
+
 import NetworkLayer.LayerManager;
 import NetworkLayer.NILayer;
-import View.AppView;
+import View.AddressPanel;
 
 public class AddressEventHandlers implements EventHandlers{
 	
@@ -24,7 +27,7 @@ public class AddressEventHandlers implements EventHandlers{
 		 * author : Taehyun
 		 * Just Alert TEST text
 		 */
-		AppView.btnSetting.addActionListener(new ActionListener() {
+		AddressPanel.btnSetting.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -33,7 +36,7 @@ public class AddressEventHandlers implements EventHandlers{
 			
 		});
 		
-		AppView.comboBox.addActionListener(new ActionListener() {
+		AddressPanel.comboBox.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -47,7 +50,7 @@ public class AddressEventHandlers implements EventHandlers{
 					for(int i = 0; i < hardwareAddress.length; i++) {
 						stringBuffer.append(String.format("%02X", (hardwareAddress[i] & 0xff)));
 					}
-					AppView.srcMacAddress.setText(stringBuffer.toString());
+					AddressPanel.srcMacAddress.setText(stringBuffer.toString());
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
