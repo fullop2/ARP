@@ -8,6 +8,7 @@ import NetworkLayer.FileAppLayer;
 import NetworkLayer.IPLayer;
 import NetworkLayer.LayerManager;
 import NetworkLayer.NILayer;
+import View.AppView;
 
 import java.util.ArrayList;
 import java.util.List;

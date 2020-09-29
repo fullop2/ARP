@@ -10,9 +10,9 @@ import java.util.List;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 
-import Application.AppView;
 import NetworkLayer.LayerManager;
 import NetworkLayer.NILayer;
+import View.AppView;
 
 public class AddressEventHandlers implements EventHandlers{
 	

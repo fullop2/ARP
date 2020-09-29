@@ -1,4 +1,4 @@
-package Application;
+package View;
 
 import java.awt.Container;
 import java.awt.FileDialog;

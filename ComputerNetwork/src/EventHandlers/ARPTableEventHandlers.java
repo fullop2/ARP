@@ -1,7 +1,7 @@
 package EventHandlers;
 
-import Application.AppView;
 import NetworkLayer.LayerManager;
+import View.AppView;
 
 public class ARPTableEventHandlers implements EventHandlers {
 
