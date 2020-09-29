@@ -1,4 +1,4 @@
-package chat_file;
+package NetworkLayer;
 
 import java.nio.ByteBuffer;
 import java.sql.Date;

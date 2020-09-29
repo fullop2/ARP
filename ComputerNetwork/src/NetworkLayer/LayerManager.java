@@ -1,4 +1,4 @@
-package chat_file;
+package NetworkLayer;
 
 import java.awt.List;
 import java.util.ArrayList;
