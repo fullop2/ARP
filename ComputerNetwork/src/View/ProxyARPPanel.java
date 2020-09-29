@@ -57,11 +57,11 @@ public class ProxyARPPanel extends JPanel {
 		proxyOutMAC.setBounds(100,240,280,20);
 		add(proxyOutMAC);
 				
-		btnProxyAdd = new JButton("Item Delete");
+		btnProxyAdd = new JButton("Item Add");
 		btnProxyAdd.setBounds(65,270,120,20);
 		add(btnProxyAdd);
 		
-		btnProxyDelete = new JButton("All Delete");
+		btnProxyDelete = new JButton("Item Delete");
 		btnProxyDelete.setBounds(215,270,120,20);
 		add(btnProxyDelete);
 	}
