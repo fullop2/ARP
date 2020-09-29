@@ -21,19 +21,6 @@ public class AppView extends JFrame{
 	public static JTextArea chattingArea;
 	public static JButton chatSendButton;
 	
-	/* Address */
-	
-	
-	/* ARP Table */
-	public static JTextArea ArpTable;
-	public static JTextField ArpIP;
-	
-	public static JButton btnArpDeleteOne;
-	public static JButton btnArpDeleteAll;
-	public static JButton btnArpSend;
-	
-	public static JLabel lblArpIP;
-	
 	
 	/* Proxy ARP */
 	public static JTextArea proxyArpEntry;
@@ -68,17 +55,14 @@ public class AppView extends JFrame{
 
 		setLayout(null);
 
-		add(arpCachePanel(0,0));
+		add(new ARPCachePanel(0,0));
 		add(proxyArpPanel(400, 0));
 		add(garpPanel(800,0));
 		add(new AddressPanel(800,150));
 		
 		setVisible(true);
 
-	}
-
-
-	
+	}	
 
 	public JPanel chatPanel(int x, int y) {
 		
@@ -105,39 +89,6 @@ public class AppView extends JFrame{
 		return pane;
 	}
 
-	public JPanel arpCachePanel(int x, int y) {
-		JPanel pane = new JPanel();
-		pane.setBounds(x,y,400,300);
-		pane.setBorder(BorderFactory.createTitledBorder("ARP Cache"));
-		pane.setLayout(null);
-		
-		ArpTable = new JTextArea();
-		ArpTable.setBounds(15,15,370,200);
-		ArpTable.setEditable(false);
-		pane.add(ArpTable);
-		
-		btnArpDeleteOne = new JButton("Item Delete");
-		btnArpDeleteOne.setBounds(65,220,120,30);
-		pane.add(btnArpDeleteOne);
-		
-		btnArpDeleteAll = new JButton("All Delete");
-		btnArpDeleteAll.setBounds(215,220,120,30);
-		pane.add(btnArpDeleteAll);
-		
-		lblArpIP = new JLabel("IP Addr");
-		lblArpIP.setBounds(15,260,65,25);
-		pane.add(lblArpIP);
-		
-		ArpIP = new JTextField();
-		ArpIP.setBounds(85,260,210,25);
-		pane.add(ArpIP);
-		
-		btnArpSend = new JButton("Send");
-		btnArpSend.setBounds(310,260,65,25);
-		pane.add(btnArpSend);
-		
-		return pane;
-	}
 	
 	public JPanel proxyArpPanel(int x, int y ) {
 		JPanel pane = new JPanel();
