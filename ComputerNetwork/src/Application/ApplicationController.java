@@ -9,6 +9,7 @@ import NetworkLayer.IPLayer;
 import NetworkLayer.LayerManager;
 import NetworkLayer.NILayer;
 import View.AppView;
+import View.ChatPanel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +48,7 @@ public class ApplicationController {
 		
 
 	public static void receiveMsg(String msg) {
-		AppView.chattingArea.append("[RECV] : " + msg + "\n");
+		ChatPanel.chattingArea.append("[RECV] : " + msg + "\n");
 	}
 }
 
