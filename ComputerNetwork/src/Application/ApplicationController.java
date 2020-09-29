@@ -7,6 +7,7 @@ import NetworkLayer.FileAppLayer;
 import NetworkLayer.IPLayer;
 import NetworkLayer.LayerManager;
 import NetworkLayer.NILayer;
+import NetworkLayer.TCPLayer;
 import View.AppView;
 import View.ChatPanel;
 
@@ -27,9 +28,10 @@ public class ApplicationController {
 		layerManager.AddLayer(new EthernetLayer("Ethernet"));
 		layerManager.AddLayer(new ARPLayer("ARP"));
 		layerManager.AddLayer(new IPLayer("IP"));
+		layerManager.AddLayer(new TCPLayer("TCP"));
 		layerManager.AddLayer(new ChatAppLayer("Chat"));
 		layerManager.AddLayer(new FileAppLayer("File"));
-		layerManager.ConnectLayers("NI ( *Ethernet ( *IP ( *Chat *File ) *ARP ( +IP ) ) )" );
+		layerManager.ConnectLayers("NI ( *Ethernet ( *IP ( *TCP ( *Chat *File ) ) *ARP ( +IP ) ) )" );
 		
 		
 		// initialization event handler in here
