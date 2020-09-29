@@ -2,26 +2,19 @@ package NetworkLayer;
 
 import java.util.ArrayList;
 
-import Application.ApplicationController;
-
-public class ApplicationLayer implements BaseLayer  {
-	
+public class TCPLayer implements BaseLayer {
 	public int nUpperLayerCount = 0;
 	public String pLayerName = null;
 	public BaseLayer p_UnderLayer = null;
-	public ArrayList<BaseLayer> p_aUpperLayer = new ArrayList<BaseLayer>();	
+	public ArrayList<BaseLayer> p_aUpperLayer = new ArrayList<BaseLayer>();
+
 	
-	public ApplicationLayer(String pName) {
+	public TCPLayer(String pName) {
+		//super(pName);
+		// TODO Auto-generated constructor stub
 		pLayerName = pName;
 	}
 	
-	public boolean Receive(byte[] input) {
-		byte[] data = input;
-		String Text = new String(data);
-		ApplicationController.receiveMsg(Text);
-		return false;
-	}
-
 	@Override
 	public void SetUnderLayer(BaseLayer pUnderLayer) {
 		// TODO Auto-generated method stub
