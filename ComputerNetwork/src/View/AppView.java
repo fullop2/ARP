@@ -22,16 +22,6 @@ public class AppView extends JFrame{
 	public static JButton chatSendButton;
 	
 	
-	/* Proxy ARP */
-
-	
-	
-	/* GARP */ 
-	static JLabel lblGARPHWAddr;
-	static JTextField GARPMacAddr;
-	static JButton btnGARPSend;	
-	
-	
 	public AppView() {
 		
 		appView = this;
@@ -46,7 +36,7 @@ public class AppView extends JFrame{
 
 		add(new ARPCachePanel(0,0));
 		add(new ProxyARPPanel(400, 0));
-		add(garpPanel(800,0));
+		add(new GARPPanel(800,0));
 		add(new AddressPanel(800,150));
 		
 		setVisible(true);
@@ -78,25 +68,5 @@ public class AppView extends JFrame{
 		return pane;
 	}	
 	
-	public JPanel garpPanel(int x, int y) {
-		JPanel pane = new JPanel();
-		pane.setBounds(x,y,400,150);
-		pane.setBorder(BorderFactory.createTitledBorder("Gratuitous ARP"));
-		pane.setLayout(null);
-		
-		lblGARPHWAddr = new JLabel("HW Addr");
-		lblGARPHWAddr.setBounds(15,45,70,30);
-		pane.add(lblGARPHWAddr);
-
-		GARPMacAddr = new JTextField();
-		GARPMacAddr.setBounds(100,45,280,30);
-		pane.add(GARPMacAddr);
-		
-		btnGARPSend = new JButton("Send");
-		btnGARPSend.setBounds(140,90,120,40);
-		pane.add(btnGARPSend);
-		
-		return pane;
-	}
 	
 }
