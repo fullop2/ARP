@@ -11,20 +11,7 @@ import org.jnetpcap.Pcap;
 import org.jnetpcap.PcapIf;
 
 public class AppView extends JFrame{
-
-	/* Global */
-	private static AppView appView;
-	static Container contentPane;
-	
-	/* Chat */
-	public static JTextField chattingWrite;
-	public static JTextArea chattingArea;
-	public static JButton chatSendButton;
-	
-	
 	public AppView() {
-		
-		appView = this;
 
 		setTitle("ARP");
 
@@ -42,31 +29,4 @@ public class AppView extends JFrame{
 		setVisible(true);
 
 	}	
-
-	public JPanel chatPanel(int x, int y) {
-		
-		JPanel pane = new JPanel();
-		pane.setBounds(x,y,400,300);
-		pane.setBorder(BorderFactory.createTitledBorder("Chat"));
-		pane.setLayout(null);
-		
-		chattingArea = new JTextArea();
-		chattingArea.setEditable(false);
-		chattingArea.setBounds(15,15,370,250);
-		pane.add(chattingArea);
-		
-		
-		chattingWrite = new JTextField();
-		chattingWrite.setBounds(15,270,295,20);
-		pane.add(chattingWrite);
-		chattingWrite.setColumns(10);
-		
-		chatSendButton = new JButton("Send");		
-		chatSendButton.setBounds(315,270,70,20);
-		pane.add(chatSendButton);
-		
-		return pane;
-	}	
-	
-	
 }
