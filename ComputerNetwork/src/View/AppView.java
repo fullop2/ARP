@@ -23,18 +23,7 @@ public class AppView extends JFrame{
 	
 	
 	/* Proxy ARP */
-	public static JTextArea proxyArpEntry;
-	
-	public static JTextField proxyDevice;
-	public static JTextField proxyInIP;
-	public static JTextField proxyOutMAC;
-	
-	public static JLabel lblProxyDevice;
-	public static JLabel lblProxyInIP;
-	public static JLabel lblProxyOutMAC;
-	
-	public static JButton btnProxyAdd;
-	public static JButton btnProxyDelete;
+
 	
 	
 	/* GARP */ 
@@ -56,7 +45,7 @@ public class AppView extends JFrame{
 		setLayout(null);
 
 		add(new ARPCachePanel(0,0));
-		add(proxyArpPanel(400, 0));
+		add(new ProxyARPPanel(400, 0));
 		add(garpPanel(800,0));
 		add(new AddressPanel(800,150));
 		
@@ -87,56 +76,7 @@ public class AppView extends JFrame{
 		pane.add(chatSendButton);
 		
 		return pane;
-	}
-
-	
-	public JPanel proxyArpPanel(int x, int y ) {
-		JPanel pane = new JPanel();
-		pane.setBounds(x,y,400,300);
-		pane.setBorder(BorderFactory.createTitledBorder("Proxy ARP Entry"));
-		pane.setLayout(null);
-		
-		proxyArpEntry = new JTextArea();
-		proxyArpEntry.setBounds(15,15,370,150);
-		proxyArpEntry.setEditable(false);
-		pane.add(proxyArpEntry);
-		
-		lblProxyDevice = new JLabel("Device");
-		lblProxyDevice.setBounds(15,180,70,20);
-		pane.add(lblProxyDevice);
-		
-		proxyDevice = new JTextField();
-		proxyDevice.setBounds(100,180,280,20);
-		pane.add(proxyDevice);
-	
-		
-		lblProxyInIP = new JLabel("IP Addr");
-		lblProxyInIP.setBounds(15,210,70,20);
-		pane.add(lblProxyInIP);
-		
-		proxyInIP = new JTextField();
-		proxyInIP.setBounds(100,210,280,20);
-		pane.add(proxyInIP);
-		
-		
-		lblProxyOutMAC = new JLabel("MAC Addr");
-		lblProxyOutMAC.setBounds(15,240,70,20);
-		pane.add(lblProxyOutMAC);
-		
-		proxyOutMAC = new JTextField();
-		proxyOutMAC.setBounds(100,240,280,20);
-		pane.add(proxyOutMAC);
-				
-		btnProxyAdd = new JButton("Item Delete");
-		btnProxyAdd.setBounds(65,270,120,20);
-		pane.add(btnProxyAdd);
-		
-		btnProxyDelete = new JButton("All Delete");
-		btnProxyDelete.setBounds(215,270,120,20);
-		pane.add(btnProxyDelete);
-		
-		return pane;
-	}
+	}	
 	
 	public JPanel garpPanel(int x, int y) {
 		JPanel pane = new JPanel();
