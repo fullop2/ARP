@@ -27,28 +27,45 @@ public class EthernetLayer implements BaseLayer {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private class _ETHERNET_HEADER {
-		_ETHERNET_ADDR enet_dstaddr;
-		_ETHERNET_ADDR enet_srcaddr;
-		byte[] enet_type;
-		byte[] enet_data;
+		_ETHERNET_ADDR enetDstAddr;
+		_ETHERNET_ADDR enetSrcAddr;
+		byte[] type;
 
 		public _ETHERNET_HEADER() {
-			this.enet_dstaddr = new _ETHERNET_ADDR();
-			this.enet_srcaddr = new _ETHERNET_ADDR();
-			this.enet_type = new byte[2];
-			this.enet_data = null;
+			this.enetDstAddr = new _ETHERNET_ADDR();
+			this.enetSrcAddr = new _ETHERNET_ADDR();
+			this.type = new byte[2];
 		}
 	}
 
-	_ETHERNET_HEADER m_sHeader = new _ETHERNET_HEADER();
+	_ETHERNET_HEADER ethernetHeader = new _ETHERNET_HEADER();
 
 	public EthernetLayer(String pName) {
 		pLayerName = pName;
 		
 	}
+	
+	public void setDstEthernetAddress(byte[] ethernetAddress) {
+		assert(ethernetAddress.length == 6);
+		for(int i = 0; i < 6; i++)
+			ethernetHeader.enetDstAddr.addr[i] = ethernetAddress[i];
+	}
 
-
+	public void setSrcEthernetAddress(byte[] ethernetAddress) {
+		assert(ethernetAddress.length == 6);
+		for(int i = 0; i < 6; i++)
+			ethernetHeader.enetSrcAddr.addr[i] = ethernetAddress[i];
+	}
+	
+	public void setEthernetType(byte[] type) {
+		assert(type.length == 2);
+		ethernetHeader.type[0] = type[0];
+		ethernetHeader.type[1] = type[1];
+	}
+	
+	
 	public boolean Send(byte[] input, int length) {
 		return false;
 	}
