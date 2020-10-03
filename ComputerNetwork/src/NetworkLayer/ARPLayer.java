@@ -62,13 +62,43 @@ public class ARPLayer implements BaseLayer {
 		}
 	}
 
-	_ARP_HEADER m_sHeader = new _ARP_HEADER();
+	_ARP_HEADER arpHeader = new _ARP_HEADER();
 	
 	
 	public ARPLayer(String string) {
 		pLayerName = string;
 	}
   
+	public void setOpcode(byte[] opcode) {
+		assert(opcode.length == 2);
+		arpHeader.opcode[0] = opcode[0];
+		arpHeader.opcode[1] = opcode[1];
+	}
+	
+	public void setEthernetSenderAddress(byte[] ethernetAddress) {
+		assert(ethernetAddress.length == 6);
+		for(int i = 0; i < 6; i++)
+			arpHeader.enetSenderAddr.addr[i] = ethernetAddress[i];
+	}
+	
+	public void setIPSenderAddress(byte[] ipAddress) {
+		assert(ipAddress.length == 4);
+		for(int i = 0; i < 4; i++)
+			arpHeader.ipSenderAddr.addr[i] = ipAddress[i];
+	}
+	
+	public void setEthernetTargetAddress(byte[] ethernetAddress) {
+		assert(ethernetAddress.length == 6);
+		for(int i = 0; i < 6; i++)
+			arpHeader.enetTargetAddr.addr[i] = ethernetAddress[i];
+	}
+	
+	public void setIPTargetAddress(byte[] ipAddress) {
+		assert(ipAddress.length == 4);
+		for(int i = 0; i < 4; i++)
+			arpHeader.ipTargetAddr.addr[i] = ipAddress[i];
+	}
+	
 	@Override
 	public void SetUnderLayer(BaseLayer pUnderLayer) {
 		// TODO Auto-generated method stub
