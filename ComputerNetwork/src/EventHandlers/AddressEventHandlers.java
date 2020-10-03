@@ -13,29 +13,59 @@ import javax.swing.JOptionPane;
 import org.jnetpcap.Pcap;
 import org.jnetpcap.PcapIf;
 
+import NetworkLayer.ARPLayer;
+import NetworkLayer.EthernetLayer;
+import NetworkLayer.IPLayer;
 import NetworkLayer.LayerManager;
 import NetworkLayer.NILayer;
 import View.AddressPanel;
 
 public class AddressEventHandlers implements EventHandlers{
 	
-	LayerManager layerManager;
 	@Override
 	public void setEventHandlers(LayerManager layerManager) {
 		/*
 		 * btnSetting
 		 * author : Taehyun
-		 * Just Alert TEST text
+		 * IP와 MAC을 Layer Model에 등록
 		 */
 		AddressPanel.btnSetting.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				JOptionPane.showConfirmDialog(null, "TEST","YES",JOptionPane.YES_OPTION);				
+				
+				String macAddress = AddressPanel.srcMacAddress.getText();			
+				byte[] hardwareAddress = new byte[6];
+				
+				for(int i = 0; i < 6; i++)
+					hardwareAddress[i] = (byte) (Integer.parseInt(macAddress.substring(i*2, i*2+2),16) & 0xff);
+				
+				String ipStringAddress = AddressPanel.srcIPAddress.getText();
+				String[] ipSplit = ipStringAddress.split("\\.");
+				
+				byte[] ipAddress = new byte[4];
+				for(int i = 0; i < 4; i++)
+					ipAddress[i] = (byte) (Integer.parseInt(ipSplit[i],16) & 0xff);
+
+				EthernetLayer ethernet = ((EthernetLayer)layerManager.GetLayer("Ethernet"));
+				ethernet.setSrcEthernetAddress(hardwareAddress);
+				
+				ARPLayer arp = ((ARPLayer)layerManager.GetLayer("ARP"));
+				arp.setEthernetSenderAddress(hardwareAddress);
+				arp.setIPSenderAddress(ipAddress);
+				
+				IPLayer ip = ((IPLayer)layerManager.GetLayer("IP"));
+				ip.setIPSrcAddr(ipAddress);
 			}
 			
 		});
 		
+		/*
+		 * comboBox
+		 * author : Taehyun
+		 * NIC 콤보박스에서 아이템 선택시
+		 * 해당 NIC의 MAC을 불러와 srcMacAddress에 표시
+		 */
 		AddressPanel.comboBox.addActionListener(new ActionListener() {
 
 			@Override
@@ -51,6 +81,7 @@ public class AddressEventHandlers implements EventHandlers{
 						stringBuffer.append(String.format("%02X", (hardwareAddress[i] & 0xff)));
 					}
 					AddressPanel.srcMacAddress.setText(stringBuffer.toString());
+
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
