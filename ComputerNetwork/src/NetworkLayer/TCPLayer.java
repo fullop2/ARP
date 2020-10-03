@@ -7,12 +7,26 @@ public class TCPLayer implements BaseLayer {
 	public String pLayerName = null;
 	public BaseLayer p_UnderLayer = null;
 	public ArrayList<BaseLayer> p_aUpperLayer = new ArrayList<BaseLayer>();
-
+	
+	@SuppressWarnings("unused")
+	private class _TCP_HEADER {
+		byte[] tcpType;
+		public _TCP_HEADER() {
+			this.tcpType = new byte[2];
+		}
+	}
+	
+	private _TCP_HEADER tcpHeader = new _TCP_HEADER();	
 	
 	public TCPLayer(String pName) {
 		//super(pName);
 		// TODO Auto-generated constructor stub
 		pLayerName = pName;
+	}
+	
+	public void setType(byte[] type) {
+		tcpHeader.tcpType[0] = type[0];
+		tcpHeader.tcpType[1] = type[1];
 	}
 	
 	@Override
