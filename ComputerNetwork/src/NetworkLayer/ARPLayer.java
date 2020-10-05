@@ -1,12 +1,15 @@
 package NetworkLayer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class ARPLayer implements BaseLayer {
 	public int nUpperLayerCount = 0;
 	public String pLayerName = null;
 	public BaseLayer p_UnderLayer = null;
 	public ArrayList<BaseLayer> p_aUpperLayer = new ArrayList<BaseLayer>();
+	// proxy arp table(key : device, value: IP Addr + MAC Addr)
+	public HashMap<String,byte[]> proxyTable=new HashMap<String, byte[]>();
 
 	private class _ETHERNET_ADDR {
 		private byte[] addr = new byte[6];
@@ -97,6 +100,35 @@ public class ARPLayer implements BaseLayer {
 		assert(ipAddress.length == 4);
 		for(int i = 0; i < 4; i++)
 			arpHeader.ipTargetAddr.addr[i] = ipAddress[i];
+	}
+
+	/*
+	 * proxy ARP 저장
+	 * author : Hyoin
+	 * key : device, value: IP Addr + MAC Addr
+	 */
+	public void setProxyTable(String device,byte[] ipAddress, byte[] ethernetAddress){
+		assert(ipAddress.length == 4);
+		assert(ethernetAddress.length == 6);
+		
+		byte [] proxy=new byte[10];
+		for(int i=0;i<4;i++){
+			proxy[i]=ipAddress[i];
+		}
+		for(int i=4;i<10;i++){
+			proxy[i]=ethernetAddress[i-4];
+		}
+		proxyTable.put(device,proxy);		
+	}
+	
+	/*
+	 * proxy ARP 삭제
+	 * author : Hyoin
+	 * key : device, value: IP Addr + MAC Addr
+	 */
+	public void removeProxyTable(String deviceaddr){
+		proxyTable.remove(deviceaddr);
+		System.out.println(proxyTable.size());
 	}
 	
 	@Override
