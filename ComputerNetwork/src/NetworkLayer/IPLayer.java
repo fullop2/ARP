@@ -19,7 +19,21 @@ public class IPLayer implements BaseLayer {
 		}
 	}
 	
+	@SuppressWarnings("unused")
 	private class _IP_HEADER {
+		byte[] VER;
+		byte[] HLEN;
+		byte[] service;
+		byte[] totalLength;
+		
+		byte[] identification;
+		byte[] flag;
+		byte[] fragmentOffset;
+		
+		byte[] timeToLive;
+		byte[] protocol;
+		byte[] headerChecksum;
+		
 		_IP_ADDR ipDstAddr;
 		_IP_ADDR ipSrcAddr;
 
