@@ -21,46 +21,76 @@ public class IPLayer implements BaseLayer {
 	
 	@SuppressWarnings("unused")
 	private class _IP_HEADER {
-		byte[] VER;
-		byte[] HLEN;
-		byte[] service;
+		byte VER;
+		byte HLEN;
+		byte service;
 		byte[] totalLength;
 		
 		byte[] identification;
-		byte[] flag;
+		byte flag;
 		byte[] fragmentOffset;
 		
-		byte[] timeToLive;
-		byte[] protocol;
+		byte timeToLive;
+		byte protocol;
 		byte[] headerChecksum;
 		
 		_IP_ADDR ipDstAddr;
 		_IP_ADDR ipSrcAddr;
 
 		public _IP_HEADER() {
-			VER = new byte[4];
-			HLEN = new byte[4];
-			service= new byte[8];
-			totalLength = new byte[16];
+			VER = 0x04; 						// IPv4 : 		0000 0100			USE LSB 4
+			HLEN = 0x05; 						// 5block : 	0000 0101			USE LSB 4
+			service = 0x00;						// service : 	0000 0000
+			totalLength = new byte[2];			
 			
-			identification = new byte[16];
-			flag = new byte[3];
-			fragmentOffset = new byte[13];
+			identification = new byte[2];
+			flag = 0x02;						// flag : 		0000 0010			USE LSB 3
+			fragmentOffset = new byte[2];		// fragOff: 	0000 0000 0000 0000 USE LSB 13
 			
-			timeToLive = new byte[8];
-			protocol = new byte[8];
-			headerChecksum = new byte[16];
+			headerChecksum = new byte[2];		
 			
-			VER[3] = 0x04; // IPv4
-			HLEN[3] = 0x05; // 20byte / 4 = 5 block
-			timeToLive[7] = 0x7F; // 127 hop
-			protocol[3] = 0x06; // TCP protocol = 6
-			
-			
+			timeToLive = 0x7F; 					// timeToLive :	0111 1111			127 hop
+			protocol = 0x06; 					// protocol	:	0000 0110			TCP 6
+					
 			this.ipDstAddr = new _IP_ADDR();
 			this.ipSrcAddr = new _IP_ADDR();
 		}
 		
+		public void setTotalLength(int length) {
+			assert(length <= 65535);
+			totalLength[0] = (byte) ((length >> 8) & 0xFF);				
+			totalLength[1] = (byte) (length & 0xFF);	
+		}
+		
+		public int getTotalLength() {
+			return (int)(totalLength[0] << 8) + (int)(totalLength[1]);
+		}
+		
+		// 데이터 전송을 위한 헤더를 만드는 함수. 
+		public byte[] makeCompleteHeader() {
+			byte[] header = new byte[20];
+			
+			header[0] = (byte) (((VER << 4) & 0xf0) | ((HLEN) & 0x0f));
+			header[1] = service;
+			header[2] = totalLength[0]; 
+			header[3] = totalLength[1];
+			
+			header[4] = identification[0];
+			header[5] = identification[1];
+			header[6] = (byte) (((flag << 5) & 0xe0) | ((fragmentOffset[0]) & 0x5)); 
+			header[7] = fragmentOffset[1];
+			
+			header[8] = headerChecksum[0];
+			header[9] = headerChecksum[1];
+			header[10] = timeToLive;
+			header[11] = protocol;
+			
+			for(int i = 0; i < 4; i++) {
+				header[12+i] = ipDstAddr.addr[i];
+				header[16+i] = ipSrcAddr.addr[i];
+			}
+			return header;
+		}
 	}
 	
 	private _IP_HEADER ipHeader = new _IP_HEADER();
