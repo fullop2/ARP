@@ -38,9 +38,29 @@ public class IPLayer implements BaseLayer {
 		_IP_ADDR ipSrcAddr;
 
 		public _IP_HEADER() {
+			VER = new byte[4];
+			HLEN = new byte[4];
+			service= new byte[8];
+			totalLength = new byte[16];
+			
+			identification = new byte[16];
+			flag = new byte[3];
+			fragmentOffset = new byte[13];
+			
+			timeToLive = new byte[8];
+			protocol = new byte[8];
+			headerChecksum = new byte[16];
+			
+			VER[3] = 0x04; // IPv4
+			HLEN[3] = 0x05; // 20byte / 4 = 5 block
+			timeToLive[7] = 0x7F; // 127 hop
+			protocol[3] = 0x06; // TCP protocol = 6
+			
+			
 			this.ipDstAddr = new _IP_ADDR();
 			this.ipSrcAddr = new _IP_ADDR();
 		}
+		
 	}
 	
 	private _IP_HEADER ipHeader = new _IP_HEADER();
