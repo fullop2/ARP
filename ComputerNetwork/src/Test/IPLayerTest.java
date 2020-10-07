@@ -14,6 +14,10 @@ class IPLayerTest {
 
 	LayerManager layerManager;
 	
+	byte[] ip1 = new byte[4];
+	byte[] ip2 = new byte[4];
+	byte[] ip3 = new byte[4];
+	
 	
 	@BeforeEach
 	void init(){
@@ -27,6 +31,21 @@ class IPLayerTest {
 		layerManager.AddLayer(new TestLayer("under"));
 		
 		layerManager.ConnectLayers("under ( *test ( *upper ) ) ");
+		
+		ip1[0] = (byte)192;
+		ip1[1] = (byte)168;
+		ip1[2] = (byte)0;
+		ip1[3] = (byte)1;
+		
+		ip2[0] = (byte)192;
+		ip2[1] = (byte)168;
+		ip2[2] = (byte)0;
+		ip2[3] = (byte)2;
+		
+		ip3[0] = (byte)192;
+		ip3[1] = (byte)168;
+		ip3[2] = (byte)0;
+		ip3[3] = (byte)3;
 	}
 	
 	@Test
@@ -34,23 +53,15 @@ class IPLayerTest {
 		String msg = "Hello World";
 		byte[] byteMsg = msg.getBytes();
 		
-		byte[] src = new byte[4];
-		byte[] dst = new byte[4];
-		
-		src[0] = (byte)192;
-		src[1] = (byte)168;
-		src[2] = (byte)0;
-		src[3] = (byte)1;
-		
-		dst[0] = (byte)192;
-		dst[1] = (byte)168;
-		dst[2] = (byte)0;
-		dst[3] = (byte)2;
-		
-		byte[] packet = makePacket(src,dst,byteMsg);
 
-		((IPLayer)layerManager.GetLayer("test")).setIPDstAddr(dst);
-		((IPLayer)layerManager.GetLayer("test")).setIPSrcAddr(src);
+		/*
+		 * sender : ip1 -> ip2
+		 * 
+		 * normal send
+		 */
+		byte[] packet = makePacket(ip1,ip2,byteMsg);
+		((IPLayer)layerManager.GetLayer("test")).setIPDstAddr(ip2);
+		((IPLayer)layerManager.GetLayer("test")).setIPSrcAddr(ip1);
 			
 		layerManager.GetLayer("upper").Send(byteMsg,byteMsg.length);
 				
@@ -63,31 +74,59 @@ class IPLayerTest {
 	void testReceive() {
 		String msg = "Bye World";
 		byte[] byteMsg = msg.getBytes();
-		
-		byte[] src = new byte[4];
-		byte[] dst = new byte[4];
-		
-		src[0] = (byte)192;
-		src[1] = (byte)168;
-		src[2] = (byte)0;
-		src[3] = (byte)4;
-		
-		dst[0] = (byte)192;
-		dst[1] = (byte)168;
-		dst[2] = (byte)0;
-		dst[3] = (byte)5;
-		
-		byte[] packet = makePacket(src,dst,byteMsg);
-		
-		// 수신자 테스트이므로 src와 dst가 반대
-		((IPLayer)layerManager.GetLayer("test")).setIPDstAddr(src);
-		((IPLayer)layerManager.GetLayer("test")).setIPSrcAddr(dst); 
-
+				
+		/*
+		 * sender : ip1 -> ip2
+		 * receiver : ip2
+		 * 
+		 * normal receive
+		 */	
+		byte[] packet = makePacket(ip1,ip2,byteMsg);
+		((IPLayer)layerManager.GetLayer("test")).setIPSrcAddr(ip2); 
 		
 		layerManager.GetLayer("under").Receive(packet);
 		
-		byte[] send = ((TestLayer)layerManager.GetLayer("upper")).getReceiveMessage();
-		assertArrayEquals(byteMsg, send);
+		byte[] receive = ((TestLayer)layerManager.GetLayer("upper")).getReceiveMessage();
+		assertArrayEquals(byteMsg, receive);
+	}
+	
+	@Test
+	void testReceiveSelf() {
+		String msg = "Bye World";
+		byte[] byteMsg = msg.getBytes();
+		
+		/*
+		 * sender : ip1 -> ip2
+		 * receiver : ip1
+		 * 
+		 * self receive
+		 */
+		byte[] packet = makePacket(ip1,ip2,byteMsg);
+		((IPLayer)layerManager.GetLayer("test")).setIPSrcAddr(ip1); 
+
+		layerManager.GetLayer("under").Receive(packet);
+		
+		byte[] receive = ((TestLayer)layerManager.GetLayer("upper")).getReceiveMessage();
+		assertArrayEquals(null, receive);
+	}
+	
+	@Test 
+	void testReceiveOtherHost(){
+		String msg = "Bye World";
+		byte[] byteMsg = msg.getBytes();
+		/*
+		 * sender : ip1 -> ip2
+		 * receiver : ip3
+		 * 
+		 * other host receive
+		 */
+		byte[] packet = makePacket(ip1,ip2,byteMsg);
+		((IPLayer)layerManager.GetLayer("test")).setIPSrcAddr(ip3); 
+
+		layerManager.GetLayer("under").Receive(packet);
+		
+		byte[] receive = ((TestLayer)layerManager.GetLayer("upper")).getReceiveMessage();
+		assertArrayEquals(null, receive);
 	}
 	
 	byte[] makePacket(byte[] src, byte[] dst, byte[] byteMsg) {		
