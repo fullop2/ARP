@@ -77,7 +77,7 @@ public class IPLayer implements BaseLayer {
 			
 			header[4] = identification[0];
 			header[5] = identification[1];
-			header[6] = (byte) (((flag << 5) & 0xe0) | ((fragmentOffset[0]) & 0x5)); 
+			header[6] = (byte) (((flag << 5) & 0xe0) | ((fragmentOffset[0]) & 0x1f)); 
 			header[7] = fragmentOffset[1];
 			
 			header[8] = headerChecksum[0];
@@ -107,6 +107,57 @@ public class IPLayer implements BaseLayer {
 	public void setIPSrcAddr(byte[] addr) {
 		for(int i = 0; i < 4; i++)
 			ipHeader.ipSrcAddr.addr[i] = addr[i];
+	}
+	
+	@Override
+	public boolean Send(byte[] input, int length) {
+		
+		byte[] packet = new byte[20+length];
+		ipHeader.setTotalLength(20+length);
+		System.arraycopy(ipHeader.makeCompleteHeader(), 0, packet, 0, 20);
+		System.arraycopy(input, 0, packet, 20, length);
+		
+		return p_UnderLayer.Send(packet, 20+length);
+	}
+	
+	// 전송된 packet의 src를 읽어 내가 전송한 것인지 확인
+	private boolean isMyPacket(byte[] packet) {
+		for(int i = 0; i < 4; i++)
+			if(ipHeader.ipSrcAddr.addr[i] != packet[16+i])
+				return false;
+		return true;
+	}
+	
+	
+	// 전송된 packet의 dst를 읽어 나에게 온 것인지 확인
+	private boolean isMine(byte[] packet) {
+		for(int i = 0; i < 4; i++)
+			if(ipHeader.ipSrcAddr.addr[i] != packet[12+i])
+				return false;
+		return true;
+	}
+	
+	private boolean versionLengthValid(byte versionLength) {
+		return versionLength == 0x45;
+	}
+	
+	@Override
+	public boolean Receive(byte[] input) {
+		if(input.length < 20)
+			return false;
+		if(versionLengthValid(input[0])) {
+			if(isMyPacket(input))
+				return false;
+			else if(isMine(input)) {
+				byte[] data = new byte[input.length-20];
+				System.arraycopy(input, 20, data, 0, input.length-20);
+				p_aUpperLayer.get(0).Receive(data);
+				return true;
+			}
+				
+		}
+		return false;
+		
 	}
 	
 	@Override
