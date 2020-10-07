@@ -10,9 +10,28 @@ public class TCPLayer implements BaseLayer {
 	
 	@SuppressWarnings("unused")
 	private class _TCP_HEADER {
-		byte[] tcpType;
+		byte[] srcPortAddress;
+		byte[] dstPortAddress;
+		byte[] sequenceNumber;
+		byte[] acknowledgementNumber;
+		byte headerLength;
+		byte reserved;
+		byte FLAG;
+		byte[] windowSize;
+		byte[] checksum;
+		byte[] urgentPointer;
+		
 		public _TCP_HEADER() {
-			this.tcpType = new byte[2];
+			srcPortAddress = new byte[2];
+			dstPortAddress = new byte[2];
+			sequenceNumber = new byte[4];
+			acknowledgementNumber = new byte[4];
+			windowSize = new byte[2];
+			checksum = new byte[2];
+			urgentPointer = new byte[2];
+			
+			headerLength = 0x05;
+			
 		}
 	}
 	
@@ -23,11 +42,7 @@ public class TCPLayer implements BaseLayer {
 		// TODO Auto-generated constructor stub
 		pLayerName = pName;
 	}
-	
-	public void setType(byte[] type) {
-		tcpHeader.tcpType[0] = type[0];
-		tcpHeader.tcpType[1] = type[1];
-	}
+
 	
 	@Override
 	public void SetUnderLayer(BaseLayer pUnderLayer) {
