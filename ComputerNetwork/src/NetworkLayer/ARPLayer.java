@@ -18,8 +18,8 @@ public class ARPLayer implements BaseLayer {
 	private List<ARPCache> arpCacheTable = new ArrayList<ARPCache>();
 	
 	public class ARPCache{
-		_IP_ADDR ip;
-		_ETHERNET_ADDR ethernet;
+		_IP_ADDR ip = new _IP_ADDR();
+		_ETHERNET_ADDR ethernet = new _ETHERNET_ADDR();
 		
 		public ARPCache(byte[] ip, byte[] ethernet) {
 			setEthernet(ethernet);
@@ -27,6 +27,8 @@ public class ARPLayer implements BaseLayer {
 		}
 		
 		public void setEthernet(byte[] ethernet) {
+			if(ethernet== null)
+				return;
 			assert(ethernet.length==6);
 			for(int i = 0; i < 6; i++)
 				this.ethernet.addr[i] = ethernet[i];
@@ -137,7 +139,7 @@ public class ARPLayer implements BaseLayer {
 	 */
 	
 	public void addARPCache(byte[] ip, byte[] ethernet) {
-		arpCacheTable.add(new ARPCache(ip,null));	
+		arpCacheTable.add(new ARPCache(ip,ethernet));	
 	}
 	
 	public void changeARPCache(byte[] ip, byte[] ethernet) {
