@@ -8,9 +8,12 @@ public class ARPLayer implements BaseLayer {
 	public String pLayerName = null;
 	public BaseLayer p_UnderLayer = null;
 	public ArrayList<BaseLayer> p_aUpperLayer = new ArrayList<BaseLayer>();
+	
 	// proxy arp table(key : device, value: IP Addr + MAC Addr)
 	public HashMap<String,byte[]> proxyTable=new HashMap<String, byte[]>();
-
+	
+	public HashMap<String, byte[]> arpCacheTable = new HashMap<String, byte[]>();
+	
 	private class _ETHERNET_ADDR {
 		private byte[] addr = new byte[6];
 
