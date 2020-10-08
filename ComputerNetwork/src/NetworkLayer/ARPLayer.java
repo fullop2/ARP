@@ -2,6 +2,8 @@ package NetworkLayer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+
 
 public class ARPLayer implements BaseLayer {
 	public int nUpperLayerCount = 0;
@@ -11,22 +13,17 @@ public class ARPLayer implements BaseLayer {
 	
 	// proxy arp table(key : device, value: IP Addr + MAC Addr)
 	public HashMap<String,byte[]> proxyTable=new HashMap<String, byte[]>();
-	// arp cache table(key : string ip addr, value : ARP Cache Info
-	public HashMap<String, ARPCache> arpCacheTable = new HashMap<String, ARPCache>();
 	
-	private class ARPCache{
-		_ETHERNET_ADDR ethernet;
+	// arp cache table
+	private List<ARPCache> arpCacheTable = new ArrayList<ARPCache>();
+	
+	public class ARPCache{
 		_IP_ADDR ip;
-		boolean state;
+		_ETHERNET_ADDR ethernet;
 		
-		public ARPCache(byte[] ethernet, byte[] ip) {
+		public ARPCache(byte[] ip, byte[] ethernet) {
 			setEthernet(ethernet);
 			setIp(ip);
-			setState(false);
-		}
-		
-		public void setState(boolean state) {
-			this.state = state;
 		}
 		
 		public void setEthernet(byte[] ethernet) {
@@ -40,7 +37,6 @@ public class ARPLayer implements BaseLayer {
 			for(int i = 0; i < 4; i++)
 				this.ip.addr[i] = ip[i];
 		}
-		
 	}
 	
 	private class _ETHERNET_ADDR {
@@ -133,7 +129,36 @@ public class ARPLayer implements BaseLayer {
 		for(int i = 0; i < 4; i++)
 			arpHeader.ipTargetAddr.addr[i] = ipAddress[i];
 	}
-
+	
+	
+	/*
+	 * ARP Cache Table Functions
+	 * author : 박태현
+	 */
+	
+	public void addARPCache(byte[] ip, byte[] ethernet) {
+		arpCacheTable.add(new ARPCache(ip,null));	
+	}
+	
+	public void changeARPCache(byte[] ip, byte[] ethernet) {
+		for(ARPCache arpCache : arpCacheTable) {
+			if(arpCache.equals(ip)) {
+				arpCache.setEthernet(ethernet);
+			}
+		}
+	}
+	
+	public byte[] getEthernet(byte[] ip) {
+		if(ip != null && ip.length == 4)
+			for(ARPCache arpCache : arpCacheTable) {
+				if(arpCache.equals(ip)) {
+					return arpCache.ethernet.addr;
+				}
+			}
+		return null;
+	}
+	
+	
 	/*
 	 * proxy ARP 저장
 	 * author : Hyoin
