@@ -11,8 +11,37 @@ public class ARPLayer implements BaseLayer {
 	
 	// proxy arp table(key : device, value: IP Addr + MAC Addr)
 	public HashMap<String,byte[]> proxyTable=new HashMap<String, byte[]>();
+	// arp cache table(key : string ip addr, value : ARP Cache Info
+	public HashMap<String, ARPCache> arpCacheTable = new HashMap<String, ARPCache>();
 	
-	public HashMap<String, byte[]> arpCacheTable = new HashMap<String, byte[]>();
+	private class ARPCache{
+		_ETHERNET_ADDR ethernet;
+		_IP_ADDR ip;
+		boolean state;
+		
+		public ARPCache(byte[] ethernet, byte[] ip) {
+			setEthernet(ethernet);
+			setIp(ip);
+			setState(false);
+		}
+		
+		public void setState(boolean state) {
+			this.state = state;
+		}
+		
+		public void setEthernet(byte[] ethernet) {
+			assert(ethernet.length==6);
+			for(int i = 0; i < 6; i++)
+				this.ethernet.addr[i] = ethernet[i];
+		}
+		
+		public void setIp(byte[] ip) {
+			assert(ip.length == 4);
+			for(int i = 0; i < 4; i++)
+				this.ip.addr[i] = ip[i];
+		}
+		
+	}
 	
 	private class _ETHERNET_ADDR {
 		private byte[] addr = new byte[6];
