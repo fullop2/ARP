@@ -62,21 +62,44 @@ class ARPLayerTest {
 		ARPLayer layer = ((ARPLayer)layerManager.GetLayer("test"));
 		layer.addARPCache(ip1, null);		
 		assertArrayEquals(ethNull, layer.getEthernet(ip1));
-		layer.changeARPCache(ip1, eth1);
+		layer.addARPCache(ip1, eth1);
 		assertArrayEquals(eth1, layer.getEthernet(ip1));
 		layer.deleteARPCache(ip1);
 		assertArrayEquals(null, layer.getEthernet(ip1));
 	}
 	
 	
-	@Disabled
 	@Test
 	void testSend() {
-		String msg = "Hello World";
-		byte[] byteMsg = msg.getBytes();
-		layerManager.GetLayer("upper").Send(byteMsg,byteMsg.length);
+
+		byte[] header = new byte[28];
+		header[0] = 0x00; 
+		header[1] = 0x01;
+		header[2] = 0x08;
+		header[3] = 0x00;
+		header[4] = 0x06;
+		header[5] = 0x04;
+		header[6] = 0x00;
+		header[7] = 0x01;
+		for(int i=0; i <6; i++) {
+			header[8+i] =  eth1[i];
+			//header[18+i] = eth2[i];
+		}
+		for(int i=0; i <4; i++) {
+			header[14+i] = ip1[i];
+			header[24+i] = ip2[i];
+		}
 		
-		assertArrayEquals(byteMsg, ((TestLayer)layerManager.GetLayer("under")).getSendMessage());
+		ARPLayer layer = ((ARPLayer)layerManager.GetLayer("test"));
+		
+		layer.setEthernetSenderAddress(eth1);
+		layer.setIPSenderAddress(ip1);
+		layer.setIPTargetAddress(ip2);
+		layer.Send();
+		
+		
+		byte[] data = ((TestLayer)layerManager.GetLayer("under")).getSendMessage();	
+		assertArrayEquals(header,data);
 		
 	}
 	

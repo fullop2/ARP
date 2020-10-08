@@ -18,6 +18,8 @@ public class ARPLayer implements BaseLayer {
 	// arp cache table
 	private List<ARPCache> arpCacheTable = new ArrayList<ARPCache>();
 	
+	
+	
 	public class ARPCache{
 		_IP_ADDR ip = new _IP_ADDR();
 		_ETHERNET_ADDR ethernet = new _ETHERNET_ADDR();
@@ -94,6 +96,51 @@ public class ARPLayer implements BaseLayer {
 			enetTargetAddr = new _ETHERNET_ADDR();
 			ipTargetAddr = new _IP_ADDR();
 		}
+		
+		public _ARP_HEADER(byte[] header) {
+			hardwareType = new byte[2];
+			hardwareType[0] = header[0]; hardwareType[1] = header[1];
+			protocolType = new byte[2];
+			protocolType[0] = header[2]; protocolType[1] = header[3];
+			hardwareSize = header[4];
+			protocolSize = header[5];
+			opcode = new byte[2];
+			opcode[0] = header[6]; opcode[1] = header[7];
+			enetSenderAddr = new _ETHERNET_ADDR();
+			ipSenderAddr = new _IP_ADDR();
+			enetTargetAddr = new _ETHERNET_ADDR();
+			ipTargetAddr = new _IP_ADDR();
+			
+			for(int i=0; i <6; i++) {
+				enetSenderAddr.addr[i] = header[9+i];
+				enetTargetAddr.addr[i] = header[19+i];
+			}
+			for(int i=0; i <4; i++) {
+				ipSenderAddr.addr[i] = header[15+i];
+				ipTargetAddr.addr[i] = header[25+i];
+			}
+		}
+		
+		public byte[] makeHeader() {
+			byte[] header = new byte[headerSize];
+			header[0] = hardwareType[0]; 
+			header[1] = hardwareType[1];
+			header[2] = protocolType[0];
+			header[3] = protocolType[1];
+			header[4] = hardwareSize;
+			header[5] = protocolSize;
+			header[6] = opcode[0];
+			header[7] = opcode[1];
+			for(int i=0; i <6; i++) {
+				header[8+i] =  enetSenderAddr.addr[i];
+				header[18+i] = enetTargetAddr.addr[i];
+			}
+			for(int i=0; i <4; i++) {
+				header[14+i] = ipSenderAddr.addr[i];
+				header[24+i] = ipTargetAddr.addr[i];
+			}
+			return header;
+		}
 	}
 
 	_ARP_HEADER arpHeader = new _ARP_HEADER();
@@ -104,12 +151,73 @@ public class ARPLayer implements BaseLayer {
 	}
   
 
-	public boolean Send() {		
+	public boolean Send() {	
+		byte[] header = arpHeader.makeHeader();
+		p_UnderLayer.Send(header,header.length);
 		return false;
 	}
 	
-	private boolean SendReply() {
-		return false;
+	private boolean isReply(byte[] opcode) {
+		return (opcode[0] == (byte)0x00) && (opcode[1] == (byte)0x02);
+	}
+	
+	private boolean isRequest(byte[] opcode) {
+		return (opcode[0] == (byte)0x00) && (opcode[1] == (byte)0x01);
+	}
+	
+	private boolean isBroadcast(byte[] ethernetAddr) {
+		for(int i = 0; i < 6; i++)
+			if(ethernetAddr[i] != (byte)0xff)
+				return false;
+		return true;
+	}
+	
+	
+	private boolean isMine(byte[] ipAddr) {
+		for(int i = 0; i < 4; i++)
+			if(ipAddr[i] != arpHeader.ipSenderAddr.addr[i])
+				return false;
+		return true;
+	}
+	
+	@Override
+	public boolean Receive(byte[] input) {
+		
+		_ARP_HEADER receivedHeader = new _ARP_HEADER(input);
+		if(isMine(receivedHeader.ipSenderAddr.addr)) {// 메세지 전송자가 나인 경우
+			return true;
+		}
+		else {
+			byte[] ip = new byte[4];
+			for(int i = 0; i < 4; i++)
+				ip[i] = receivedHeader.ipSenderAddr.addr[i];
+			
+			byte[] eth = new byte[6];
+			for(int i = 0; i < 4; i++)
+				eth[i] = receivedHeader.enetSenderAddr.addr[i];
+			
+			addARPCache(ip,eth);
+		}
+		
+		// 내게 온 요청인 경우
+		if(isRequest(receivedHeader.opcode) && isMine(receivedHeader.ipTargetAddr.addr)) {
+			
+			receivedHeader.enetTargetAddr = arpHeader.enetSenderAddr;
+			
+			_IP_ADDR ipSender = receivedHeader.ipSenderAddr;
+			_ETHERNET_ADDR ethSender = receivedHeader.enetSenderAddr;
+			
+			receivedHeader.ipSenderAddr = receivedHeader.ipTargetAddr;
+			receivedHeader.enetSenderAddr = receivedHeader.enetTargetAddr;
+			
+			receivedHeader.ipTargetAddr = ipSender;
+			receivedHeader.enetTargetAddr = ethSender;
+			
+			byte[] header = receivedHeader.makeHeader();
+			p_UnderLayer.Send(header,header.length);
+		}
+			
+		return true;
 	}
 	
 	
@@ -149,13 +257,16 @@ public class ARPLayer implements BaseLayer {
 	 * author : 박태현
 	 */
 	
-	public void addARPCache(byte[] ip, byte[] ethernet) {
-		for(ARPCache arpCache : arpCacheTable) {
-			if(Arrays.equals(arpCache.ip.addr,ip)) {
-				return;
+	public boolean addARPCache(byte[] ip, byte[] ethernet) {
+		for(int i = 0; i < arpCacheTable.size(); i++) {
+			ARPCache cache = arpCacheTable.get(i);
+			if(Arrays.equals(cache.ip.addr,ip)) {
+				cache.setEthernet(ethernet);
+				return false;
 			}
 		}
 		arpCacheTable.add(new ARPCache(ip,ethernet));	
+		return true;
 	}
 
 	public void deleteARPCache(byte[] ip) {
@@ -166,14 +277,7 @@ public class ARPLayer implements BaseLayer {
 			}
 		}
 	}
-	
-	public void changeARPCache(byte[] ip, byte[] ethernet) {
-		for(ARPCache arpCache : arpCacheTable) {
-			if(Arrays.equals(arpCache.ip.addr,ip)) {
-				arpCache.setEthernet(ethernet);
-			}
-		}
-	}
+
 	
 	public byte[] getEthernet(byte[] ip) {
 		if(ip != null && ip.length == 4)

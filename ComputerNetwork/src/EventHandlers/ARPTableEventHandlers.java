@@ -22,10 +22,12 @@ public class ARPTableEventHandlers implements EventHandlers {
 					ipAddress[i] = (byte) (Integer.parseInt(ipSplit[i], 16) & 0xff);
 				
 				ARPLayer arpLayer = ((ARPLayer)layerManager.GetLayer("ARP"));
-				arpLayer.addARPCache(ipAddress, null);
-				ARPCachePanel.ArpTable.add(ip+" ???????????? incompleted\n");
+				boolean newItemAdded = arpLayer.addARPCache(ipAddress, null);
 				
-				arpLayer.Send(null, 0);
+				if(newItemAdded)
+					ARPCachePanel.ArpTable.add(ip+" ???????????? incompleted\n");
+				
+				arpLayer.Send();
 			}
 		});
 		
