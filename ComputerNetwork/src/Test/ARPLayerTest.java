@@ -103,14 +103,40 @@ class ARPLayerTest {
 		
 	}
 	
-	@Disabled
 	@Test
 	void testReceive() {
-		String msg = "Hello World";
-		byte[] byteMsg = msg.getBytes();
-		layerManager.GetLayer("under").Receive(byteMsg);
+		byte[] header = new byte[28];
+		header[0] = 0x00; 
+		header[1] = 0x01;
+		header[2] = 0x08;
+		header[3] = 0x00;
+		header[4] = 0x06;
+		header[5] = 0x04;
+		header[6] = 0x00;
+		header[7] = 0x01;
+		for(int i=0; i <6; i++) {
+			header[8+i] =  eth2[i]; // sender
+			//header[18+i] = eth2[i];
+		}
+		for(int i=0; i <4; i++) {
+			header[14+i] = ip2[i]; // sender
+			header[24+i] = ip1[i]; // target
+		}
 		
-		assertArrayEquals(byteMsg, ((TestLayer)layerManager.GetLayer("upper")).getReceiveMessage());
+		ARPLayer layer = ((ARPLayer)layerManager.GetLayer("test"));
+		
+		
+		// target info
+		layer.setEthernetSenderAddress(eth1);
+		layer.setIPSenderAddress(ip1);
+		
+		layer.setIPTargetAddress(ip2);
+		
+		layer.Receive(header);
+		
+		
+		byte[] eth = layer.getEthernet(ip2);	
+		assertArrayEquals(eth2,eth);
 	}
 
 }

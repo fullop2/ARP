@@ -112,12 +112,12 @@ public class ARPLayer implements BaseLayer {
 			ipTargetAddr = new _IP_ADDR();
 			
 			for(int i=0; i <6; i++) {
-				enetSenderAddr.addr[i] = header[9+i];
-				enetTargetAddr.addr[i] = header[19+i];
+				enetSenderAddr.addr[i] = header[8+i];
+				enetTargetAddr.addr[i] = header[18+i];
 			}
 			for(int i=0; i <4; i++) {
-				ipSenderAddr.addr[i] = header[15+i];
-				ipTargetAddr.addr[i] = header[25+i];
+				ipSenderAddr.addr[i] = header[14+i];
+				ipTargetAddr.addr[i] = header[24+i];
 			}
 		}
 		
@@ -193,7 +193,7 @@ public class ARPLayer implements BaseLayer {
 				ip[i] = receivedHeader.ipSenderAddr.addr[i];
 			
 			byte[] eth = new byte[6];
-			for(int i = 0; i < 4; i++)
+			for(int i = 0; i < 6; i++)
 				eth[i] = receivedHeader.enetSenderAddr.addr[i];
 			
 			addARPCache(ip,eth);
@@ -201,6 +201,8 @@ public class ARPLayer implements BaseLayer {
 		
 		// 내게 온 요청인 경우
 		if(isRequest(receivedHeader.opcode) && isMine(receivedHeader.ipTargetAddr.addr)) {
+			
+			receivedHeader.opcode[1] = 0x02;
 			
 			receivedHeader.enetTargetAddr = arpHeader.enetSenderAddr;
 			
