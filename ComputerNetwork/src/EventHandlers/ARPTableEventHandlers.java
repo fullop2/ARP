@@ -32,7 +32,6 @@ public class ARPTableEventHandlers implements EventHandlers {
 		});
 		
 		ARPCachePanel.btnArpDeleteOne.addActionListener(new ActionListener() {
-			
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				String data = ARPCachePanel.ArpTable.getSelectedItem();
@@ -50,7 +49,6 @@ public class ARPTableEventHandlers implements EventHandlers {
 		});
 		
 		ARPCachePanel.btnArpDeleteAll.addActionListener(new ActionListener() {
-			
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				String[] data = ARPCachePanel.ArpTable.getItems();

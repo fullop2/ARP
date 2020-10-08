@@ -57,6 +57,28 @@ class ARPLayerTest {
 		eth[3] = addr; eth[4] = addr; eth[5] = addr;
 	}
 	
+	public byte[] makeHeader(byte[] senderIP, byte[] targetIP, byte[] senderEth, byte[] targetEth, byte opcode1) {
+		byte[] header = new byte[28];
+		header[0] = 0x00; 
+		header[1] = 0x01;
+		header[2] = 0x08;
+		header[3] = 0x00;
+		header[4] = 0x06;
+		header[5] = 0x04;
+		header[6] = 0x00; 
+		header[7] = opcode1; // request
+		for(int i=0; i <6; i++) {
+			header[8+i] =  senderEth[i]; // sender
+			header[18+i] = targetEth[i]; // target
+		}
+		for(int i=0; i <4; i++) {
+			header[14+i] = senderIP[i]; // sender
+			header[24+i] = targetIP[i]; // target
+		}
+		return header;
+	}
+	
+	// ARP Table Function 동작 확인
 	@Test
 	void testARPTableBasicFlow() {
 		ARPLayer layer = ((ARPLayer)layerManager.GetLayer("test"));
@@ -68,27 +90,11 @@ class ARPLayerTest {
 		assertArrayEquals(null, layer.getEthernet(ip1));
 	}
 	
-	
+	// ARP Request 송신 확인
 	@Test
 	void testSend() {
 
-		byte[] header = new byte[28];
-		header[0] = 0x00; 
-		header[1] = 0x01;
-		header[2] = 0x08;
-		header[3] = 0x00;
-		header[4] = 0x06;
-		header[5] = 0x04;
-		header[6] = 0x00;
-		header[7] = 0x01;
-		for(int i=0; i <6; i++) {
-			header[8+i] =  eth1[i];
-			//header[18+i] = eth2[i];
-		}
-		for(int i=0; i <4; i++) {
-			header[14+i] = ip1[i];
-			header[24+i] = ip2[i];
-		}
+		byte[] header = makeHeader(ip1,ip2,eth1,ethNull,(byte) 0x1);
 		
 		ARPLayer layer = ((ARPLayer)layerManager.GetLayer("test"));
 		
@@ -103,40 +109,66 @@ class ARPLayerTest {
 		
 	}
 	
+	// ARP Request 수신 확인
 	@Test
-	void testReceive() {
-		byte[] header = new byte[28];
-		header[0] = 0x00; 
-		header[1] = 0x01;
-		header[2] = 0x08;
-		header[3] = 0x00;
-		header[4] = 0x06;
-		header[5] = 0x04;
-		header[6] = 0x00;
-		header[7] = 0x01;
-		for(int i=0; i <6; i++) {
-			header[8+i] =  eth2[i]; // sender
-			//header[18+i] = eth2[i];
-		}
-		for(int i=0; i <4; i++) {
-			header[14+i] = ip2[i]; // sender
-			header[24+i] = ip1[i]; // target
-		}
-		
+	void testJustReceive() {
 		ARPLayer layer = ((ARPLayer)layerManager.GetLayer("test"));
 		
-		
-		// target info
 		layer.setEthernetSenderAddress(eth1);
 		layer.setIPSenderAddress(ip1);
-		
 		layer.setIPTargetAddress(ip2);
 		
+		byte[] header = makeHeader(ip2, ip1, eth2, eth1, (byte)0x01); 
+					
 		layer.Receive(header);
 		
+		byte[] eth = layer.getEthernet(ip2);	
+		assertArrayEquals(eth2,eth);			
+	}
+
+	// ARP Request 송신 후 ARP Reply 수신 확인
+	@Test
+	void testSettingAndReceive() {
+		
+		ARPLayer layer = ((ARPLayer)layerManager.GetLayer("test"));
+		layer.setEthernetSenderAddress(eth1);
+		layer.setIPSenderAddress(ip1);
+		layer.setIPTargetAddress(ip2);
+		
+		byte[] header = makeHeader(ip1, ip2, eth1, ethNull, (byte)0x1);
+		layer.Send();
+		
+		byte[] sendData = ((TestLayer)layerManager.GetLayer("under")).getSendMessage();	
+		assertArrayEquals(header,sendData);
+		
+		header = makeHeader(ip2, ip1, eth2, eth1, (byte)0x2); // reply
+		layer.Receive(header);
 		
 		byte[] eth = layer.getEthernet(ip2);	
-		assertArrayEquals(eth2,eth);
+		assertArrayEquals(eth2,eth);	
+	}
+	
+	// ARP Request 수신 및 ARP Reply 확인
+	@Test
+	void testReceiveRequest() {
+		
+		ARPLayer layer = ((ARPLayer)layerManager.GetLayer("test"));
+		layer.setEthernetSenderAddress(eth1);
+		layer.setIPSenderAddress(ip1);
+		layer.setIPTargetAddress(ip2);
+		
+		byte[] header = makeHeader(ip2, ip1, eth2, ethNull, (byte)0x1); // request
+		layer.Receive(header);
+		
+		byte[] eth = layer.getEthernet(ip2);	
+		assertArrayEquals(eth2,eth);	
+		
+		header = makeHeader(ip1, ip2, eth1, eth2, (byte)0x2); // reply
+		
+		TestLayer under = ((TestLayer)layerManager.GetLayer("under"));	
+		byte[] sendData = under.getSendMessage();
+		
+		assertArrayEquals(header, sendData); // reply is valid
 	}
 
 }

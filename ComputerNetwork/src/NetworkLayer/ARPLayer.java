@@ -157,21 +157,9 @@ public class ARPLayer implements BaseLayer {
 		return false;
 	}
 	
-	private boolean isReply(byte[] opcode) {
-		return (opcode[0] == (byte)0x00) && (opcode[1] == (byte)0x02);
-	}
-	
 	private boolean isRequest(byte[] opcode) {
 		return (opcode[0] == (byte)0x00) && (opcode[1] == (byte)0x01);
 	}
-	
-	private boolean isBroadcast(byte[] ethernetAddr) {
-		for(int i = 0; i < 6; i++)
-			if(ethernetAddr[i] != (byte)0xff)
-				return false;
-		return true;
-	}
-	
 	
 	private boolean isMine(byte[] ipAddr) {
 		for(int i = 0; i < 4; i++)
@@ -202,8 +190,9 @@ public class ARPLayer implements BaseLayer {
 		// 내게 온 요청인 경우
 		if(isRequest(receivedHeader.opcode) && isMine(receivedHeader.ipTargetAddr.addr)) {
 			
-			receivedHeader.opcode[1] = 0x02;
+			receivedHeader.opcode[1] = 0x02; // make reply
 			
+			// swap sender and target
 			receivedHeader.enetTargetAddr = arpHeader.enetSenderAddr;
 			
 			_IP_ADDR ipSender = receivedHeader.ipSenderAddr;
