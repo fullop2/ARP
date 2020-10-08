@@ -103,6 +103,16 @@ public class ARPLayer implements BaseLayer {
 		pLayerName = string;
 	}
   
+
+	public boolean Send() {		
+		return false;
+	}
+	
+	private boolean SendReply() {
+		return false;
+	}
+	
+	
 	public void setOpcode(byte[] opcode) {
 		assert(opcode.length == 2);
 		arpHeader.opcode[0] = opcode[0];

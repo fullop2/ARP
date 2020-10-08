@@ -23,9 +23,48 @@ public class ARPTableEventHandlers implements EventHandlers {
 				
 				ARPLayer arpLayer = ((ARPLayer)layerManager.GetLayer("ARP"));
 				arpLayer.addARPCache(ipAddress, null);
+				ARPCachePanel.ArpTable.add(ip+" ???????????? incompleted\n");
 				
-				ARPCachePanel.ArpTable.append(ip+"\t????????????\tincompleted\n");
+				arpLayer.Send(null, 0);
+			}
+		});
+		
+		ARPCachePanel.btnArpDeleteOne.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				String data = ARPCachePanel.ArpTable.getSelectedItem();
+				if(data == null) return;
+				String ip = data.split(" ")[0];
+				String[] ipSplit = ip.split("\\.");
+				byte[] ipAddress = new byte[4];
+				for (int i = 0; i < 4; i++)
+					ipAddress[i] = (byte) (Integer.parseInt(ipSplit[i], 16) & 0xff);
 				
+				ARPLayer arpLayer = ((ARPLayer)layerManager.GetLayer("ARP"));
+				arpLayer.deleteARPCache(ipAddress);
+				ARPCachePanel.ArpTable.remove(data);
+			}
+		});
+		
+		ARPCachePanel.btnArpDeleteAll.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				String[] data = ARPCachePanel.ArpTable.getItems();
+				if(data.length == 0) return;
+				
+				for(String cache : data) {
+					String ip = cache.split(" ")[0];
+					String[] ipSplit = ip.split("\\.");
+					byte[] ipAddress = new byte[4];
+					for (int i = 0; i < 4; i++)
+						ipAddress[i] = (byte) (Integer.parseInt(ipSplit[i], 16) & 0xff);
+					
+					ARPLayer arpLayer = ((ARPLayer)layerManager.GetLayer("ARP"));
+					arpLayer.deleteARPCache(ipAddress);
+					ARPCachePanel.ArpTable.remove(cache);
+				}
 			}
 		});
 	}
