@@ -15,7 +15,7 @@ class ARPLayerTest {
 	LayerManager layerManager;
 	
 	byte[] ip1,ip2,ip3;
-	byte[] eth1,eth2,eth3;
+	byte[] eth1,eth2,eth3,ethNull;
 	
 	@BeforeEach
 	void init(){
@@ -47,20 +47,25 @@ class ARPLayerTest {
 		
 		eth3 = new byte[6];
 		setEthernet(eth3,(byte)0xCC);
+		
+		ethNull = new byte[6];
+		setEthernet(ethNull,(byte)0);
 	}
 	
 	void setEthernet(byte[] eth, byte addr) {
-		eth = new byte[6];
 		eth[0] = addr; eth[1] = addr; eth[2] = addr; 
 		eth[3] = addr; eth[4] = addr; eth[5] = addr;
 	}
 	
 	@Test
-	void testARPTable() {
+	void testARPTableBasicFlow() {
 		ARPLayer layer = ((ARPLayer)layerManager.GetLayer("test"));
-		layer.addARPCache(ip1, null);
-		
-		assertEquals(null, layer.getEthernet(ip1));
+		layer.addARPCache(ip1, null);		
+		assertArrayEquals(ethNull, layer.getEthernet(ip1));
+		layer.changeARPCache(ip1, eth1);
+		assertArrayEquals(eth1, layer.getEthernet(ip1));
+		layer.deleteARPCache(ip1);
+		assertArrayEquals(null, layer.getEthernet(ip1));
 	}
 	
 	

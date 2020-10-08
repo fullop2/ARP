@@ -1,6 +1,7 @@
 package NetworkLayer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -139,12 +140,26 @@ public class ARPLayer implements BaseLayer {
 	 */
 	
 	public void addARPCache(byte[] ip, byte[] ethernet) {
+		for(ARPCache arpCache : arpCacheTable) {
+			if(Arrays.equals(arpCache.ip.addr,ip)) {
+				return;
+			}
+		}
 		arpCacheTable.add(new ARPCache(ip,ethernet));	
+	}
+
+	public void deleteARPCache(byte[] ip) {
+		for(ARPCache arpCache : arpCacheTable) {
+			if(Arrays.equals(arpCache.ip.addr,ip)) {
+				arpCacheTable.remove(arpCache);
+				return;
+			}
+		}
 	}
 	
 	public void changeARPCache(byte[] ip, byte[] ethernet) {
 		for(ARPCache arpCache : arpCacheTable) {
-			if(arpCache.equals(ip)) {
+			if(Arrays.equals(arpCache.ip.addr,ip)) {
 				arpCache.setEthernet(ethernet);
 			}
 		}
@@ -153,7 +168,7 @@ public class ARPLayer implements BaseLayer {
 	public byte[] getEthernet(byte[] ip) {
 		if(ip != null && ip.length == 4)
 			for(ARPCache arpCache : arpCacheTable) {
-				if(arpCache.equals(ip)) {
+				if(Arrays.equals(arpCache.ip.addr,ip)) {
 					return arpCache.ethernet.addr;
 				}
 			}
