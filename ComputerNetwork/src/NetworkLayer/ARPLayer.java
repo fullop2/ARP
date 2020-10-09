@@ -260,9 +260,30 @@ public class ARPLayer implements BaseLayer {
 		return (opcode[0] == (byte)0x00) && (opcode[1] == (byte)0x01);
 	}
 	
+	private boolean hasIPInProxyTable(byte[] receiveIP) {
+		for(byte[] address : proxyTable.values()) {
+			byte[] ip = new byte[4];
+			for(int i = 0; i < 4; i++)
+				ip[i] = address[i];
+			// Proxy ARP에 수신한 메세지의 목적지 IP 정보가 있을 경우
+			// 내 정보로 이더넷을 갱신하여 전송
+			if(Arrays.equals(ip, receiveIP)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	private boolean isMine(byte[] ipAddr) {
 		for(int i = 0; i < 4; i++)
 			if(ipAddr[i] != arpHeader.ipSenderAddr.addr[i])
+				return false;
+		return true;
+	}
+	
+	private boolean isBroadCast(byte[] ethernetAddr) {
+		for(int i = 0; i < 6; i++)
+			if(ethernetAddr[i] != (byte)0xff)
 				return false;
 		return true;
 	}
@@ -271,31 +292,41 @@ public class ARPLayer implements BaseLayer {
 	public boolean Receive(byte[] input) {
 		
 		_ARP_HEADER receivedHeader = new _ARP_HEADER(input);
-		if(isMine(receivedHeader.ipSenderAddr.addr)) {// 메세지 전송자가 나인 경우
+		
+		if(isMine(receivedHeader.ipSenderAddr.addr)) {// 메세지 전송자가 나인 경우 아무것도 하지 않음
 			return true;
 		}
-		else { // 내가 보낸 ARP가 아니라면 ARP Table에 추가
-			byte[] ip = new byte[4];
-			for(int i = 0; i < 4; i++)
-				ip[i] = receivedHeader.ipSenderAddr.addr[i];
-			
-			byte[] eth = new byte[6];
-			for(int i = 0; i < 6; i++)
-				eth[i] = receivedHeader.enetSenderAddr.addr[i];
-			
-			addARPCache(ip,eth);
-			setTimer(receivedHeader);
-
-		}
 		
-		// 내게 온 요청인 경우
-		if(isRequest(receivedHeader.opcode) && isMine(receivedHeader.ipTargetAddr.addr)) {
-			
+		// 내가 보낸 ARP가 아니라면 ARP Table에 추가
+		byte[] ip = new byte[4];
+		for(int i = 0; i < 4; i++)
+			ip[i] = receivedHeader.ipSenderAddr.addr[i];
+		
+		byte[] eth = new byte[6];
+		for(int i = 0; i < 6; i++)
+			eth[i] = receivedHeader.enetSenderAddr.addr[i];
+		
+		addARPCache(ip,eth);
+		setTimer(receivedHeader);
+		
+
+		/*
+		 * 1. ARP 요청이고
+		 * 
+		 * 1) 나에게 온 요청일 경우
+		 * 2) 브로드캐스트이고 목적지가 내 프록시 테이블에 있을 경우 
+		 * 
+		 * 내 맥을 넣어서 답장
+		 */
+		if(isRequest(receivedHeader.opcode) && 
+			(isMine(receivedHeader.ipTargetAddr.addr) || 
+			   (isBroadCast(receivedHeader.enetTargetAddr.addr) && 
+			    hasIPInProxyTable(receivedHeader.ipTargetAddr.addr)))) 
+		{	
 			receivedHeader.opcode[1] = 0x02; // make reply
-			
-			// swap sender and target
 			receivedHeader.enetTargetAddr = arpHeader.enetSenderAddr;
 			
+			// swap sender and target
 			_IP_ADDR ipSender = receivedHeader.ipSenderAddr;
 			_ETHERNET_ADDR ethSender = receivedHeader.enetSenderAddr;
 			
@@ -306,9 +337,9 @@ public class ARPLayer implements BaseLayer {
 			receivedHeader.enetTargetAddr = ethSender;
 			
 			byte[] header = receivedHeader.makeHeader();
-			p_UnderLayer.Send(header,header.length);
+			p_UnderLayer.Send(header,header.length);	
 		}
-			
+		
 		return true;
 	}
 	

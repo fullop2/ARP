@@ -16,7 +16,7 @@ class ARPLayerTest {
 	public LayerManager layerManager;
 	
 	public byte[] ip1,ip2,ip3;
-	public byte[] eth1,eth2,eth3,ethNull;
+	public byte[] eth1,eth2,eth3,ethNull,ethBroadCast;
 	
 	AppView view = new AppView(false);
 	
@@ -53,6 +53,9 @@ class ARPLayerTest {
 		
 		ethNull = new byte[6];
 		setEthernet(ethNull,(byte)0);
+		
+		ethBroadCast = new byte[6];
+		setEthernet(ethBroadCast, (byte)0xff);
 	}
 	
 	void setEthernet(byte[] eth, byte addr) {
@@ -176,4 +179,31 @@ class ARPLayerTest {
 		assertArrayEquals(header, sendData); // reply is valid
 	}
 
+	@Test
+	void testReceiveARPinProxy() throws InterruptedException {
+		
+		view.setVisible(true);
+		
+		ARPLayer layer = ((ARPLayer)layerManager.GetLayer("test"));
+		layer.setEthernetSenderAddress(eth1);
+		layer.setIPSenderAddress(ip1);
+		layer.setIPTargetAddress(ip2);
+		
+		layer.setProxyTable("0", ip3, eth3);
+		
+		byte[] header = makeHeader(ip2, ip3, eth2, ethBroadCast, (byte)0x1); // request
+		layer.Receive(header);
+		
+		byte[] eth = layer.getEthernet(ip2);	
+		assertArrayEquals(eth2,eth);	
+		
+		header = makeHeader(ip3, ip2, eth1, eth2, (byte)0x2); // reply
+		
+		TestLayer under = ((TestLayer)layerManager.GetLayer("under"));	
+		byte[] sendData = under.getSendMessage();
+		
+		assertArrayEquals(header, sendData); // reply is valid
+		
+		Thread.sleep(3000);
+	}
 }
