@@ -3,7 +3,6 @@ package Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import NetworkLayer.ARPLayer;
@@ -11,14 +10,14 @@ import NetworkLayer.LayerManager;
 import NetworkLayer.TestLayer;
 import View.AppView;
 
-class ARPLayerTest {
+class ARPLayerWithThreadTest{
 
 	public LayerManager layerManager;
 	
 	public byte[] ip1,ip2,ip3;
 	public byte[] eth1,eth2,eth3,ethNull;
 	
-	AppView view = new AppView(false);
+	AppView view = new AppView();
 	
 	@BeforeEach
 	void init(){
@@ -80,59 +79,11 @@ class ARPLayerTest {
 		}
 		return header;
 	}
-	
-	// ARP Table Function 동작 확인
-	@Test
-	void testARPTableBasicFlow() {
-		ARPLayer layer = ((ARPLayer)layerManager.GetLayer("test"));
-		layer.addARPCache(ip1, null);		
-		assertArrayEquals(ethNull, layer.getEthernet(ip1));
-		layer.addARPCache(ip1, eth1);
-		assertArrayEquals(eth1, layer.getEthernet(ip1));
-		layer.deleteARPCache(ip1);
-		assertArrayEquals(null, layer.getEthernet(ip1));
-	}
-	
-	// ARP Request 송신 확인
-	@Test
-	void testSend() {
-
-		byte[] header = makeHeader(ip1,ip2,eth1,ethNull,(byte) 0x1);
-		
-		ARPLayer layer = ((ARPLayer)layerManager.GetLayer("test"));
-		
-		layer.setEthernetSenderAddress(eth1);
-		layer.setIPSenderAddress(ip1);
-		layer.setIPTargetAddress(ip2);
-		layer.Send();
-		
-		
-		byte[] data = ((TestLayer)layerManager.GetLayer("under")).getSendMessage();	
-		assertArrayEquals(header,data);
-		
-	}
-	
-	// ARP Request 수신 확인
-	@Test
-	void testJustReceive() {
-		ARPLayer layer = ((ARPLayer)layerManager.GetLayer("test"));
-		
-		layer.setEthernetSenderAddress(eth1);
-		layer.setIPSenderAddress(ip1);
-		layer.setIPTargetAddress(ip2);
-		
-		byte[] header = makeHeader(ip2, ip1, eth2, eth1, (byte)0x01); 
-					
-		layer.Receive(header);
-		
-		byte[] eth = layer.getEthernet(ip2);	
-		assertArrayEquals(eth2,eth);			
-	}
 
 	// ARP Request 송신 후 ARP Reply 수신 확인
+	// 자동 삭제 스레드 테스트	
 	@Test
-	void testSettingAndReceive() {
-		
+	void testSettingAndReceiveWithTimer() throws InterruptedException {
 		ARPLayer layer = ((ARPLayer)layerManager.GetLayer("test"));
 		layer.setEthernetSenderAddress(eth1);
 		layer.setIPSenderAddress(ip1);
@@ -144,36 +95,17 @@ class ARPLayerTest {
 		byte[] sendData = ((TestLayer)layerManager.GetLayer("under")).getSendMessage();	
 		assertArrayEquals(header,sendData);
 		
+		Thread.sleep(2000);
 		header = makeHeader(ip2, ip1, eth2, eth1, (byte)0x2); // reply
 		layer.Receive(header);
 		
 		byte[] eth = layer.getEthernet(ip2);	
 		assertArrayEquals(eth2,eth);	
-	}
-	
-	
-	
-	// ARP Request 수신 및 ARP Reply 확인
-	@Test
-	void testReceiveRequest() {
 		
-		ARPLayer layer = ((ARPLayer)layerManager.GetLayer("test"));
-		layer.setEthernetSenderAddress(eth1);
-		layer.setIPSenderAddress(ip1);
-		layer.setIPTargetAddress(ip2);
+		Thread.sleep(25000);
 		
-		byte[] header = makeHeader(ip2, ip1, eth2, ethNull, (byte)0x1); // request
-		layer.Receive(header);
-		
-		byte[] eth = layer.getEthernet(ip2);	
-		assertArrayEquals(eth2,eth);	
-		
-		header = makeHeader(ip1, ip2, eth1, eth2, (byte)0x2); // reply
-		
-		TestLayer under = ((TestLayer)layerManager.GetLayer("under"));	
-		byte[] sendData = under.getSendMessage();
-		
-		assertArrayEquals(header, sendData); // reply is valid
-	}
+		eth = layer.getEthernet(ip2);	
+		assertArrayEquals(null,eth);
+	}					
 
 }
