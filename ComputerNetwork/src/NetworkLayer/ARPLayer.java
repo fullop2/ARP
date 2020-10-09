@@ -3,7 +3,10 @@ package NetworkLayer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+
+import View.ARPCachePanel;
 
 
 public class ARPLayer implements BaseLayer {
@@ -17,8 +20,9 @@ public class ARPLayer implements BaseLayer {
 	
 	// arp cache table
 	private List<ARPCache> arpCacheTable = new ArrayList<ARPCache>();
+	private List<ARPTimer> listArpTimer = new ArrayList<ARPTimer>();
 	
-	
+	private final byte[] NIL_ETHERNET = new byte[6];
 	
 	public class ARPCache{
 		_IP_ADDR ip = new _IP_ADDR();
@@ -41,6 +45,25 @@ public class ARPLayer implements BaseLayer {
 			assert(ip.length == 4);
 			for(int i = 0; i < 4; i++)
 				this.ip.addr[i] = ip[i];
+		}
+		
+		public String toString() {
+			
+			StringBuffer stringBuffer = new StringBuffer();
+			
+			for(int i = 0; i < 3; i++)
+				stringBuffer.append((int)(ip.addr[i] & 0xff)+".");
+			stringBuffer.append((int)(ip.addr[3] & 0xff)+" ");
+			if(Arrays.equals(NIL_ETHERNET, ethernet.addr)) {
+				stringBuffer.append("???????????? incompleted\n");
+			}
+			else {
+				for(int i = 0; i < 4; i++)
+					stringBuffer.append(ip.addr[i]);
+				stringBuffer.append("completed\n");
+			}
+			
+			return stringBuffer.toString();
 		}
 	}
 	
@@ -148,12 +171,60 @@ public class ARPLayer implements BaseLayer {
 	
 	public ARPLayer(String string) {
 		pLayerName = string;
+		
+		for(int i = 0; i < 6; i++)
+			NIL_ETHERNET[i] = 0x00;
 	}
   
-
+	
+	private class ARPTimer extends Thread{
+		
+		byte[] ip;
+		ARPTimer(byte[] ip){
+			this.ip = new byte[4];
+			for(int i = 0; i < 4; i++)
+				this.ip[i] = ip[i]; 
+		}
+		
+		@Override
+		public void run() {
+			try {
+				System.out.println("wait for 3");
+				Thread.sleep(3000);
+				if(Arrays.equals(NIL_ETHERNET,getEthernet(ip))) {
+					deleteARPCache(ip);
+				}
+				else {
+					System.out.println("wait for 17");
+					Thread.sleep(17000);
+					if(getEthernet(ip) != null) {
+						deleteARPCache(ip);
+					}
+				}
+				
+			} catch (InterruptedException e) {
+				System.out.println("interrupted");
+			}
+		}
+	}
+	
 	public boolean Send() {	
 		byte[] header = arpHeader.makeHeader();
+		
 		p_UnderLayer.Send(header,header.length);
+		
+		ARPTimer arpTimer = new ARPTimer(arpHeader.ipTargetAddr.addr);
+		Iterator<ARPTimer> iter = listArpTimer.iterator();
+		while(iter.hasNext()) {
+			ARPTimer currentTimer = iter.next();
+			if(Arrays.equals(currentTimer.ip, arpHeader.ipTargetAddr.addr)){
+					currentTimer.interrupt();
+					iter.remove();
+			}
+		}
+		arpTimer.start();
+		listArpTimer.add(arpTimer);
+		
 		return false;
 	}
 	
@@ -185,6 +256,7 @@ public class ARPLayer implements BaseLayer {
 				eth[i] = receivedHeader.enetSenderAddr.addr[i];
 			
 			addARPCache(ip,eth);
+
 		}
 		
 		// 내게 온 요청인 경우
@@ -209,6 +281,17 @@ public class ARPLayer implements BaseLayer {
 		}
 			
 		return true;
+	}
+	
+	private void updateARPCachePanel() {
+		String[] stringData = new String[arpCacheTable.size()];
+		for(int i = 0; i < stringData.length; i++)
+			stringData[i] = arpCacheTable.get(i).toString();
+		
+		ARPCachePanel.ArpTable.removeAll();
+		for(String str : stringData) {
+			ARPCachePanel.ArpTable.add(str);
+		}
 	}
 	
 	
@@ -249,21 +332,31 @@ public class ARPLayer implements BaseLayer {
 	 */
 	
 	public boolean addARPCache(byte[] ip, byte[] ethernet) {
-		for(int i = 0; i < arpCacheTable.size(); i++) {
-			ARPCache cache = arpCacheTable.get(i);
+		
+		Iterator<ARPCache> iter = arpCacheTable.iterator();
+		
+		while(iter.hasNext()) {
+			ARPCache cache = iter.next();
 			if(Arrays.equals(cache.ip.addr,ip)) {
 				cache.setEthernet(ethernet);
+				updateARPCachePanel();
 				return false;
 			}
 		}
-		arpCacheTable.add(new ARPCache(ip,ethernet));	
+		
+		arpCacheTable.add(new ARPCache(ip,ethernet));
+		updateARPCachePanel();
 		return true;
 	}
 
 	public void deleteARPCache(byte[] ip) {
-		for(ARPCache arpCache : arpCacheTable) {
+		
+		Iterator<ARPCache> iter = arpCacheTable.iterator();
+		while(iter.hasNext()) {
+			ARPCache arpCache = iter.next();
 			if(Arrays.equals(arpCache.ip.addr,ip)) {
 				arpCacheTable.remove(arpCache);
+				updateARPCachePanel();
 				return;
 			}
 		}
@@ -277,7 +370,7 @@ public class ARPLayer implements BaseLayer {
 					return arpCache.ethernet.addr;
 				}
 			}
-		return null;
+		return null; // not exist
 	}
 	
 	

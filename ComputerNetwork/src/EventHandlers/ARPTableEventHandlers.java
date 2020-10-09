@@ -2,6 +2,7 @@ package EventHandlers;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.StringTokenizer;
 
 import NetworkLayer.ARPLayer;
 import NetworkLayer.LayerManager;
@@ -16,17 +17,14 @@ public class ARPTableEventHandlers implements EventHandlers {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				String ip = ARPCachePanel.ArpIP.getText();
-				String[] ipSplit = ip.split("\\.");
+				StringTokenizer ipSplit = new StringTokenizer(ip, ".");
 				byte[] ipAddress = new byte[4];
-				for (int i = 0; i < 4; i++)
-					ipAddress[i] = (byte) (Integer.parseInt(ipSplit[i], 16) & 0xff);
-				
+				for (int i = 0; i < 4; i++) {
+					ipAddress[i] = (byte)Integer.parseInt(Integer.toHexString(Integer.parseInt(ipSplit.nextToken())),16);
+				}
 				ARPLayer arpLayer = ((ARPLayer)layerManager.GetLayer("ARP"));
-				boolean newItemAdded = arpLayer.addARPCache(ipAddress, null);
-				
-				if(newItemAdded)
-					ARPCachePanel.ArpTable.add(ip+" ???????????? incompleted\n");
-				
+				arpLayer.addARPCache(ipAddress, null);
+				arpLayer.setIPTargetAddress(ipAddress);
 				arpLayer.Send();
 			}
 		});
@@ -36,11 +34,12 @@ public class ARPTableEventHandlers implements EventHandlers {
 			public void actionPerformed(ActionEvent arg0) {
 				String data = ARPCachePanel.ArpTable.getSelectedItem();
 				if(data == null) return;
-				String ip = data.split(" ")[0];
-				String[] ipSplit = ip.split("\\.");
+				String ip = ARPCachePanel.ArpIP.getText();
+				StringTokenizer ipSplit = new StringTokenizer(ip, ".");
 				byte[] ipAddress = new byte[4];
-				for (int i = 0; i < 4; i++)
-					ipAddress[i] = (byte) (Integer.parseInt(ipSplit[i], 16) & 0xff);
+				for (int i = 0; i < 4; i++) {
+					ipAddress[i] = (byte)Integer.parseInt(Integer.toHexString(Integer.parseInt(ipSplit.nextToken())),16);
+				}
 				
 				ARPLayer arpLayer = ((ARPLayer)layerManager.GetLayer("ARP"));
 				arpLayer.deleteARPCache(ipAddress);
@@ -55,11 +54,12 @@ public class ARPTableEventHandlers implements EventHandlers {
 				if(data.length == 0) return;
 				
 				for(String cache : data) {
-					String ip = cache.split(" ")[0];
-					String[] ipSplit = ip.split("\\.");
+					String ip = ARPCachePanel.ArpIP.getText();
+					StringTokenizer ipSplit = new StringTokenizer(ip, ".");
 					byte[] ipAddress = new byte[4];
-					for (int i = 0; i < 4; i++)
-						ipAddress[i] = (byte) (Integer.parseInt(ipSplit[i], 16) & 0xff);
+					for (int i = 0; i < 4; i++) {
+						ipAddress[i] = (byte)Integer.parseInt(Integer.toHexString(Integer.parseInt(ipSplit.nextToken())),16);
+					}
 					
 					ARPLayer arpLayer = ((ARPLayer)layerManager.GetLayer("ARP"));
 					arpLayer.deleteARPCache(ipAddress);
