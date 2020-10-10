@@ -14,9 +14,9 @@ class IPLayerTest {
 
 	LayerManager layerManager;
 	
-	byte[] ip1 = new byte[4];
-	byte[] ip2 = new byte[4];
-	byte[] ip3 = new byte[4];
+	byte[] ip1 = {(byte)192,(byte)168,(byte)0,(byte)1};
+	byte[] ip2 = {(byte)192,(byte)168,(byte)0,(byte)2};
+	byte[] ip3 = {(byte)192,(byte)168,(byte)0,(byte)3};
 	
 	
 	@BeforeEach
@@ -28,25 +28,31 @@ class IPLayerTest {
 		
 		layerManager.AddLayer(new TestLayer("upper"));
 		layerManager.AddLayer(new IPLayer("test"));
-		layerManager.AddLayer(new TestLayer("under"));
+		layerManager.AddLayer(new TestLayer("ethernet"));
+		layerManager.AddLayer(new TestLayer("arp"));
 		
-		layerManager.ConnectLayers("under ( *test ( *upper ) ) ");
+		layerManager.ConnectLayers("ethernet ( ( *arp ( *test ( *upper ) )  *test ) ) ");
 		
-		ip1[0] = (byte)192;
-		ip1[1] = (byte)168;
-		ip1[2] = (byte)0;
-		ip1[3] = (byte)1;
-		
-		ip2[0] = (byte)192;
-		ip2[1] = (byte)168;
-		ip2[2] = (byte)0;
-		ip2[3] = (byte)2;
-		
-		ip3[0] = (byte)192;
-		ip3[1] = (byte)168;
-		ip3[2] = (byte)0;
-		ip3[3] = (byte)3;
 	}
+	
+	
+	@Test
+	void testSendARP() {
+		/*
+		 * sender arp : ip1, ip2
+		 * 
+		 * normal send
+		 */
+
+		((IPLayer)layerManager.GetLayer("test")).setIPSrcAddr(ip1);
+			
+		layerManager.GetLayer("upper").Send(null,0);
+				
+		byte[] send = ((TestLayer)layerManager.GetLayer("arp")).getSendMessage();
+		assertArrayEquals(null, send);
+		
+	}	
+	
 	
 	@Test
 	void testSend() {
@@ -65,7 +71,7 @@ class IPLayerTest {
 			
 		layerManager.GetLayer("upper").Send(byteMsg,byteMsg.length);
 				
-		byte[] send = ((TestLayer)layerManager.GetLayer("under")).getSendMessage();
+		byte[] send = ((TestLayer)layerManager.GetLayer("ethernet")).getSendMessage();
 		assertArrayEquals(packet, send);
 		
 	}	
@@ -84,7 +90,7 @@ class IPLayerTest {
 		byte[] packet = makePacket(ip1,ip2,byteMsg);
 		((IPLayer)layerManager.GetLayer("test")).setIPSrcAddr(ip2); 
 		
-		layerManager.GetLayer("under").Receive(packet);
+		((TestLayer)layerManager.GetLayer("ethernet")).Receive(packet,1);
 		
 		byte[] receive = ((TestLayer)layerManager.GetLayer("upper")).getReceiveMessage();
 		assertArrayEquals(byteMsg, receive);
@@ -104,7 +110,7 @@ class IPLayerTest {
 		byte[] packet = makePacket(ip1,ip2,byteMsg);
 		((IPLayer)layerManager.GetLayer("test")).setIPSrcAddr(ip1); 
 
-		layerManager.GetLayer("under").Receive(packet);
+		layerManager.GetLayer("ethernet").Receive(packet);
 		
 		byte[] receive = ((TestLayer)layerManager.GetLayer("upper")).getReceiveMessage();
 		assertArrayEquals(null, receive);
@@ -123,7 +129,7 @@ class IPLayerTest {
 		byte[] packet = makePacket(ip1,ip2,byteMsg);
 		((IPLayer)layerManager.GetLayer("test")).setIPSrcAddr(ip3); 
 
-		layerManager.GetLayer("under").Receive(packet);
+		layerManager.GetLayer("ethernet").Receive(packet);
 		
 		byte[] receive = ((TestLayer)layerManager.GetLayer("upper")).getReceiveMessage();
 		assertArrayEquals(null, receive);

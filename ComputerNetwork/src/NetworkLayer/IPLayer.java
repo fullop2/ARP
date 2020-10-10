@@ -1,11 +1,13 @@
 package NetworkLayer;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class IPLayer implements BaseLayer {
 	public int nUpperLayerCount = 0;
 	public String pLayerName = null;
-	public BaseLayer p_UnderLayer = null;
+	public ArrayList<BaseLayer> p_aUnderLayer = new ArrayList<BaseLayer>();
 	public ArrayList<BaseLayer> p_aUpperLayer = new ArrayList<BaseLayer>();
 	
 	private class _IP_ADDR {
@@ -56,6 +58,30 @@ public class IPLayer implements BaseLayer {
 			this.ipSrcAddr = new _IP_ADDR();
 		}
 		
+		public _IP_HEADER(byte[] header) {
+			this();
+			VER = (byte) ((header[0] >> 4 ) & 0x0f);
+			HLEN = (byte) (header[0] & 0x0f);
+			
+			service = header[1];
+			totalLength[0] = header[2]; 
+			totalLength[1] = header[3];
+			
+			identification[0] = header[4];
+			identification[1] = header[5];
+			flag = (byte) ((header[6] >> 5 ) & 0x7);
+			fragmentOffset[0] = (byte) (header[6] & 0x1f);
+			fragmentOffset[1] = header[7];
+			
+			headerChecksum[0] = header[8];
+			headerChecksum[1] = header[9];
+			timeToLive = header[10];
+			protocol = header[11];
+			
+			System.arraycopy(header, 12, ipDstAddr.addr, 0, 4);
+			System.arraycopy(header, 16, ipSrcAddr.addr, 0, 4);
+		}
+		
 		public void setTotalLength(int length) {
 			assert(length <= 65535);
 			totalLength[0] = (byte) ((length >> 8) & 0xFF);				
@@ -67,7 +93,7 @@ public class IPLayer implements BaseLayer {
 		}
 		
 		// 데이터 전송을 위한 헤더를 만드는 함수. 
-		public byte[] makeCompleteHeader() {
+		public byte[] makeHeader() {
 			byte[] header = new byte[20];
 			
 			header[0] = (byte) (((VER << 4) & 0xf0) | ((HLEN) & 0x0f));
@@ -112,43 +138,39 @@ public class IPLayer implements BaseLayer {
 	@Override
 	public boolean Send(byte[] input, int length) {
 		
+		if(input == null && length == 0) // ARP req
+			return p_aUnderLayer.get(1).Send(null, 0);
+		
 		byte[] packet = new byte[20+length];
 		ipHeader.setTotalLength(20+length);
-		System.arraycopy(ipHeader.makeCompleteHeader(), 0, packet, 0, 20);
+		System.arraycopy(ipHeader.makeHeader(), 0, packet, 0, 20);
 		System.arraycopy(input, 0, packet, 20, length);
 		
-		return p_UnderLayer.Send(packet, 20+length);
+		return p_aUnderLayer.get(0).Send(packet, 20+length);
 	}
 	
-	// 전송된 packet의 src를 읽어 내가 전송한 것인지 확인
-	private boolean isMyPacket(byte[] packet) {
-		for(int i = 0; i < 4; i++)
-			if(ipHeader.ipSrcAddr.addr[i] != packet[16+i])
-				return false;
-		return true;
+	// 해당 ip가 내 ip인지 확인
+	private boolean isMine(byte[] ip) {
+		return Arrays.equals(ipHeader.ipSrcAddr.addr, ip);
 	}
 	
-	
-	// 전송된 packet의 dst를 읽어 나에게 온 것인지 확인
-	private boolean isMine(byte[] packet) {
-		for(int i = 0; i < 4; i++)
-			if(ipHeader.ipSrcAddr.addr[i] != packet[12+i])
-				return false;
-		return true;
+	private boolean versionValid(byte versionLength) {
+		return versionLength == 0x04;
 	}
-	
-	private boolean versionLengthValid(byte versionLength) {
-		return versionLength == 0x45;
+	private boolean lengthValid(byte versionLength) {
+		return versionLength == 0x05;
 	}
 	
 	@Override
 	public boolean Receive(byte[] input) {
 		if(input.length < 20)
 			return false;
-		if(versionLengthValid(input[0])) {
-			if(isMyPacket(input))
+		
+		_IP_HEADER receiveHeader = new _IP_HEADER(input);
+		if(versionValid(receiveHeader.VER) && lengthValid(receiveHeader.HLEN)) {
+			if(isMine(receiveHeader.ipSrcAddr.addr))
 				return false;
-			else if(isMine(input)) {
+			else if(isMine(receiveHeader.ipDstAddr.addr)) {
 				byte[] data = new byte[input.length-20];
 				System.arraycopy(input, 20, data, 0, input.length-20);
 				p_aUpperLayer.get(0).Receive(data);
@@ -165,7 +187,7 @@ public class IPLayer implements BaseLayer {
 		// TODO Auto-generated method stub
 		if (pUnderLayer == null)
 			return;
-		this.p_UnderLayer = pUnderLayer;
+		this.p_aUnderLayer.add(pUnderLayer);
 	}
 
 	@Override
@@ -186,9 +208,17 @@ public class IPLayer implements BaseLayer {
 	@Override
 	public BaseLayer GetUnderLayer() {
 		// TODO Auto-generated method stub
-		if (p_UnderLayer == null)
+		if (p_aUnderLayer.size() == 0)
 			return null;
-		return p_UnderLayer;
+		return p_aUnderLayer.get(0);
+	}
+	
+	@Override
+	public BaseLayer GetUnderLayer(int index) {
+		// TODO Auto-generated method stub
+		if (p_aUnderLayer.size() == 0)
+			return null;
+		return p_aUnderLayer.get(index);
 	}
 
 	@Override
