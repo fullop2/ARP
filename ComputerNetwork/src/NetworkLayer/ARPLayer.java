@@ -2,6 +2,7 @@ package NetworkLayer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -19,8 +20,7 @@ public class ARPLayer implements BaseLayer {
 	public HashMap<String,byte[]> proxyTable=new HashMap<String, byte[]>();
 	
 	// arp cache table
-	private List<ARPCache> arpCacheTable = new ArrayList<ARPCache>();
-	private List<ARPTimer> listArpTimer = new ArrayList<ARPTimer>();
+	private List<ARPCache> arpCacheTable = Collections.synchronizedList(new ArrayList<ARPCache>());
 	
 	private final byte[] NIL_ETHERNET = new byte[6];
 	private final byte[] BROADCAST_ETHERNET = new byte[6];
@@ -28,12 +28,21 @@ public class ARPLayer implements BaseLayer {
 	public class ARPCache{
 		_IP_ADDR ip = new _IP_ADDR();
 		_ETHERNET_ADDR ethernet = new _ETHERNET_ADDR();
+		int timeToLive;
 		
 		public ARPCache(byte[] ip, byte[] ethernet) {
 			setEthernet(ethernet);
 			setIp(ip);
+			
+			if(isNIL(ethernet))
+				setTimeToLive(30000);
+			else
+				setTimeToLive(60000);
 		}
 		
+		public void setTimeToLive(int milliSecond) {
+			timeToLive = milliSecond;
+		}
 		public void setEthernet(byte[] ethernet) {
 			if(ethernet== null)
 				return;
@@ -173,6 +182,8 @@ public class ARPLayer implements BaseLayer {
 			NIL_ETHERNET[i] = 0x00;
 			BROADCAST_ETHERNET[i] = (byte)0xff;
 		}
+		
+		new ARPTimer().start();
 	}
   
 	
@@ -211,72 +222,28 @@ public class ARPLayer implements BaseLayer {
 	}
 	
 	
-	private class ARPTimer extends Thread{
-		
-		byte[] ip;
-		ARPTimer(byte[] ip){
-			this.ip = new byte[4];
-			System.arraycopy(ip, 0, this.ip, 0, 4);
-		}
+	class ARPTimer extends Thread {
 		
 		@Override
 		public void run() {
-			try {
-				System.out.println("wait for 3");
-				Thread.sleep(60000);
-				if(isNIL(getEthernet(ip))) {
-					deleteARPCache(ip);
-				}				
-			} catch (InterruptedException e) {
-				System.out.println("interrupted");
-			}
-		}
-	}
-
-	private class ARPReceiveTimer extends ARPTimer{
-		ARPReceiveTimer(byte[] ip){
-			super(ip);
-		}
-		
-		@Override
-		public void run() {
-			try {
-				System.out.println("wait for 20");
-				Thread.sleep(120000);
-				if(getEthernet(ip) != null) {
-					deleteARPCache(ip);
+			while(true) {
+				try {
+					Thread.sleep(1000);
+					
+					Iterator<ARPCache> iter = arpCacheTable.iterator();
+					while(iter.hasNext()) {
+						ARPCache cache = iter.next();
+						cache.timeToLive -= 1000;
+						if(cache.timeToLive <= 0) {
+							iter.remove();
+							updateARPCachePanel();
+						}
+					}
+				} catch (InterruptedException e) {
+					e.printStackTrace();
 				}
-				
-			} catch (InterruptedException e) {
-				System.out.println("interrupted");
 			}
 		}
-	}
-	
-	/*
-	 * 가져온 헤더의 목적지를 확인
-	 * 목적지가 이미 있다면 해당 목적지의 타이머를 제거
-	 * 제거한 경우 20분으로, 아닌 경우 3분으로 새로운 타이머를 추가
-	 */
-	private void setTimer(_ARP_HEADER header) {
-		
-		Iterator<ARPTimer> iter = listArpTimer.iterator();
-		while(iter.hasNext()) {
-			ARPTimer currentTimer = iter.next();
-			if(Arrays.equals(currentTimer.ip, header.ipTargetAddr.addr)){
-					currentTimer.interrupt();
-					iter.remove();
-			}
-		}
-
-		ARPTimer arpTimer = null;
-		if(isNIL(getEthernet(header.ipTargetAddr.addr)))
-			arpTimer = new ARPTimer(header.ipTargetAddr.addr);
-		else
-			arpTimer = new ARPReceiveTimer(header.ipTargetAddr.addr);
-		
-		arpTimer.start();
-		listArpTimer.add(arpTimer);
 	}
 	
 	@Override
@@ -285,8 +252,6 @@ public class ARPLayer implements BaseLayer {
 		
 		addARPCache(arpHeader.ipTargetAddr.addr, NIL_ETHERNET);
 		p_UnderLayer.Send(header,header.length);
-		
-		setTimer(arpHeader);
 		
 		System.out.println("Send ARP request");
 		return false;
@@ -313,7 +278,6 @@ public class ARPLayer implements BaseLayer {
 		System.out.println();
 		
 		addARPCache(ip,eth);
-		setTimer(receivedHeader);
 		
 		System.out.println("Receive ARP");
 		
@@ -430,15 +394,6 @@ public class ARPLayer implements BaseLayer {
 			if(Arrays.equals(arpCache.ip.addr,ip)) {
 				arpCacheTable.remove(arpCache);
 				updateARPCachePanel();
-				
-				Iterator<ARPTimer> iterTimer = listArpTimer.iterator();
-				while(iterTimer.hasNext()) {
-					ARPTimer currentTimer = iterTimer.next();
-					if(Arrays.equals(currentTimer.ip, ip)){
-							currentTimer.interrupt();
-							iterTimer.remove();
-					}
-				}
 				return;
 			}
 		}
