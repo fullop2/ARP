@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.StringTokenizer;
 
+import NetworkLayer.ARPAppLayer;
 import NetworkLayer.ARPLayer;
 import NetworkLayer.LayerManager;
 import View.ARPCachePanel;
@@ -22,10 +23,18 @@ public class ARPTableEventHandlers implements EventHandlers {
 				for (int i = 0; i < 4; i++) {
 					ipAddress[i] = (byte)Integer.parseInt(Integer.toHexString(Integer.parseInt(ipSplit.nextToken())),16);
 				}
+				
+				// app
+				ARPAppLayer arpAppLayer = ((ARPAppLayer)layerManager.GetLayer("ARPA"));
+				
+				// no info for tcp,ip
+				
+				// arp
 				ARPLayer arpLayer = ((ARPLayer)layerManager.GetLayer("ARP"));
 				arpLayer.addARPCache(ipAddress, null);
 				arpLayer.setIPTargetAddress(ipAddress);
-				arpLayer.Send();
+	
+				arpAppLayer.Send();
 			}
 		});
 		

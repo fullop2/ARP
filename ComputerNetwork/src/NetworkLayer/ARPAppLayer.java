@@ -8,6 +8,11 @@ public class ARPAppLayer implements BaseLayer {
 	public BaseLayer p_UnderLayer = null;
 	public ArrayList<BaseLayer> p_aUpperLayer = new ArrayList<BaseLayer>();
 
+
+	public boolean Send() {
+		p_UnderLayer.Send(null, 0);
+		return true;
+	}
 	
 	public ARPAppLayer(String pName) {
 		pLayerName = pName;

@@ -1,5 +1,6 @@
 package Application;
 
+import NetworkLayer.ARPAppLayer;
 import NetworkLayer.ARPLayer;
 import NetworkLayer.ChatAppLayer;
 import NetworkLayer.EthernetLayer;
@@ -31,7 +32,8 @@ public class ApplicationController {
 		layerManager.AddLayer(new TCPLayer("TCP"));
 		layerManager.AddLayer(new ChatAppLayer("Chat"));
 		layerManager.AddLayer(new FileAppLayer("File"));
-		layerManager.ConnectLayers("NI ( *Ethernet ( *IP ( *TCP ( *Chat *File ) ) *ARP ( +IP ) ) )" );
+		layerManager.AddLayer(new ARPAppLayer("ARPA"));
+		layerManager.ConnectLayers("NI ( *Ethernet ( *IP ( *TCP ( *Chat *File *ARPA ) ) *ARP ( +IP ) ) )" );
 		
 		
 		// initialization event handler in here
