@@ -70,11 +70,12 @@ public class NILayer implements BaseLayer {
 		}
 		return true;
 	}
-
-	public synchronized boolean Receive() {
+	public void stopReceive() {
 		if(obj != null) {
 			obj.interrupt();
 		}
+	}
+	public synchronized boolean Receive() {
 		Receive_Thread thread = new Receive_Thread(m_AdapterObject, this.GetUpperLayer(0));
 		obj = new Thread(thread);
 		obj.start();
@@ -141,7 +142,7 @@ class Receive_Thread implements Runnable {
 
 	@Override
 	public void run() {
-		while (true) {
+		while (!Thread.currentThread().isInterrupted()) {
 			PcapPacketHandler<String> jpacketHandler = new PcapPacketHandler<String>() {
 				public void nextPacket(PcapPacket packet, String user) {
 					data = packet.getByteArray(0, packet.size());
@@ -149,7 +150,7 @@ class Receive_Thread implements Runnable {
 				}
 			};
 
-			AdapterObject.loop(100000, jpacketHandler, "");
+			AdapterObject.loop(500000, jpacketHandler, "");
 		}
 	}
 }
