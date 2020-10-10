@@ -12,9 +12,15 @@ import NetworkLayer.TestLayer;
 class EthernetLayerTest {
 public LayerManager layerManager;
 	
-	public byte[] eth1,eth2,eth3,ethNull,ethBroadCast;
+	byte[] eth1 = {(byte)0xAA,(byte)0xAA,(byte)0xAA,(byte)0xAA,(byte)0xAA,(byte)0xAA};
+	byte[] eth2 = {(byte)0xBB,(byte)0xBB,(byte)0xBB,(byte)0xBB,(byte)0xBB,(byte)0xBB};
+	byte[] eth3 = {(byte)0xCC,(byte)0xCC,(byte)0xCC,(byte)0xCC,(byte)0xCC,(byte)0xCC};
+	byte[] ethNull = {0x00,0x00,0x00,0x00,0x00,0x00};
+	byte[] ethBroadCast = {(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF};
 	
-	public byte[] typeIPv4, typeARP;
+	byte[] typeIPv4 = {0x08,0x00};
+	byte[] typeARP = {0x08,0x06};
+	
 	@BeforeEach
 	void init(){
 		
@@ -29,28 +35,6 @@ public LayerManager layerManager;
 		
 		layerManager.ConnectLayers("under ( *test ( *IP *ARP ) ) ");
 		
-		eth1 = new byte[6];
-		setEthernet(eth1,(byte)0xAA);
-		
-		eth2 = new byte[6];
-		setEthernet(eth2,(byte)0xBB);
-		
-		eth3 = new byte[6];
-		setEthernet(eth3,(byte)0xCC);
-		
-		ethNull = new byte[6];
-		setEthernet(ethNull,(byte)0);
-		
-		ethBroadCast = new byte[6];
-		setEthernet(ethBroadCast, (byte)0xff);
-		
-		typeIPv4 = new byte[2];
-		typeIPv4[0] = (byte)0x08;
-		typeIPv4[1] = (byte)0x00;
-		
-		typeARP = new byte[2];
-		typeARP[0] = (byte)0x08;
-		typeARP[1] = (byte)0x06;
 	}
 	
 	void setEthernet(byte[] eth, byte addr) {
@@ -60,11 +44,8 @@ public LayerManager layerManager;
 	
 	public byte[] makeHeader(byte[] destEth, byte[] sourceEth, byte[] ethType) {
 		byte[] header = new byte[14];
-
-		for(int i=0; i < 6; i++) {
-			header[i] = destEth[i]; 
-			header[6+i] = sourceEth[i];
-		}
+		System.arraycopy(destEth, 0, header, 0, 6);
+		System.arraycopy(sourceEth, 0, header, 6, 6);
 		header[12] = ethType[0];
 		header[13] = ethType[1];
 		
@@ -119,5 +100,51 @@ public LayerManager layerManager;
 		System.arraycopy(msg, 0, frame, 14, msg.length);
 		
 		assertArrayEquals(frame, sendMessage);
+	}
+	
+	@Test
+	public void testReceiveARP() {
+
+		byte[] msg = "Hello".getBytes();
+		byte[] frame = new byte[14+msg.length];
+		byte[] header = makeHeader(ethBroadCast,eth1,typeARP);
+		
+		EthernetLayer ethernetLayer = (EthernetLayer)layerManager.GetLayer("test");
+		ethernetLayer.setSrcEthernetAddress(eth1);
+		
+		System.arraycopy(header, 0, frame, 0, 14);
+		System.arraycopy(msg, 0, frame, 14, msg.length);
+
+		TestLayer underLayer = (TestLayer)layerManager.GetLayer("under");
+		underLayer.Receive(frame);
+		
+		TestLayer arpLayer = (TestLayer)layerManager.GetLayer("ARP");
+		
+		byte[] receiveMessage = arpLayer.getReceiveMessage();
+		
+		assertArrayEquals(msg, receiveMessage);
+	}
+	
+	@Test
+	public void testReceiveIP() {
+
+		byte[] msg = "Hello".getBytes();
+		byte[] frame = new byte[14+msg.length];
+		byte[] header = makeHeader(eth1,eth2,typeIPv4);
+		
+		EthernetLayer ethernetLayer = (EthernetLayer)layerManager.GetLayer("test");
+		ethernetLayer.setSrcEthernetAddress(eth1);
+		
+		System.arraycopy(header, 0, frame, 0, 14);
+		System.arraycopy(msg, 0, frame, 14, msg.length);
+
+		TestLayer underLayer = (TestLayer)layerManager.GetLayer("under");
+		underLayer.Receive(frame);
+		
+		TestLayer arpLayer = (TestLayer)layerManager.GetLayer("IP");
+		
+		byte[] receiveMessage = arpLayer.getReceiveMessage();
+		
+		assertArrayEquals(msg, receiveMessage);
 	}
 }
