@@ -2,14 +2,19 @@ package NetworkLayer;
 
 import java.util.ArrayList;
 
+/*
+ * 명시적인 ARP App Class
+ */
 public class ARPAppLayer implements BaseLayer {
 	public int nUpperLayerCount = 0;
 	public String pLayerName = null;
 	public BaseLayer p_UnderLayer = null;
 	public ArrayList<BaseLayer> p_aUpperLayer = new ArrayList<BaseLayer>();
-
-
-	public boolean Send() {
+	
+	// 정보를 넣어도 하위로 전달되지 않음
+	// 단순 ARP 요청 용도
+	@Override
+	public boolean Send(byte[] input, int length) {
 		p_UnderLayer.Send(null, 0);
 		return true;
 	}

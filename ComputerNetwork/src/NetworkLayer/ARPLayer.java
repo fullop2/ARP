@@ -23,6 +23,7 @@ public class ARPLayer implements BaseLayer {
 	private List<ARPTimer> listArpTimer = new ArrayList<ARPTimer>();
 	
 	private final byte[] NIL_ETHERNET = new byte[6];
+	private final byte[] BROADCAST_ETHERNET = new byte[6];
 	
 	public class ARPCache{
 		_IP_ADDR ip = new _IP_ADDR();
@@ -37,14 +38,12 @@ public class ARPLayer implements BaseLayer {
 			if(ethernet== null)
 				return;
 			assert(ethernet.length==6);
-			for(int i = 0; i < 6; i++)
-				this.ethernet.addr[i] = ethernet[i];
+			System.arraycopy(ethernet, 0, this.ethernet.addr, 0, 6);
 		}
 		
 		public void setIp(byte[] ip) {
 			assert(ip.length == 4);
-			for(int i = 0; i < 4; i++)
-				this.ip.addr[i] = ip[i];
+			System.arraycopy(ip, 0, this.ip.addr, 0, 4);
 		}
 		
 		public String toString() {
@@ -134,14 +133,12 @@ public class ARPLayer implements BaseLayer {
 			enetTargetAddr = new _ETHERNET_ADDR();
 			ipTargetAddr = new _IP_ADDR();
 			
-			for(int i=0; i <6; i++) {
-				enetSenderAddr.addr[i] = header[8+i];
-				enetTargetAddr.addr[i] = header[18+i];
-			}
-			for(int i=0; i <4; i++) {
-				ipSenderAddr.addr[i] = header[14+i];
-				ipTargetAddr.addr[i] = header[24+i];
-			}
+			System.arraycopy(header, 8, enetSenderAddr.addr, 0, 6);
+			System.arraycopy(header, 18, enetTargetAddr.addr, 0, 6);
+
+			System.arraycopy(header, 14, ipSenderAddr.addr, 0, 4);
+			System.arraycopy(header, 24, ipTargetAddr.addr, 0, 4);
+
 		}
 		
 		public byte[] makeHeader() {
@@ -154,14 +151,13 @@ public class ARPLayer implements BaseLayer {
 			header[5] = protocolSize;
 			header[6] = opcode[0];
 			header[7] = opcode[1];
-			for(int i=0; i <6; i++) {
-				header[8+i] =  enetSenderAddr.addr[i];
-				header[18+i] = enetTargetAddr.addr[i];
-			}
-			for(int i=0; i <4; i++) {
-				header[14+i] = ipSenderAddr.addr[i];
-				header[24+i] = ipTargetAddr.addr[i];
-			}
+			
+			System.arraycopy(enetSenderAddr.addr, 0, header, 8, 6);
+			System.arraycopy(enetTargetAddr.addr, 0, header, 18, 6);
+
+			System.arraycopy(ipSenderAddr.addr, 0, header, 14, 4);
+			System.arraycopy(ipTargetAddr.addr, 0, header, 24, 4);
+			
 			return header;
 		}
 	}
@@ -172,18 +168,54 @@ public class ARPLayer implements BaseLayer {
 	public ARPLayer(String string) {
 		pLayerName = string;
 		
-		for(int i = 0; i < 6; i++)
+		for(int i = 0; i < 6; i++) {
 			NIL_ETHERNET[i] = 0x00;
+			BROADCAST_ETHERNET[i] = (byte)0xff;
+		}
 	}
   
+	
+	private boolean isRequest(byte[] opcode) {
+		return (opcode[0] == (byte)0x00) && (opcode[1] == (byte)0x01);
+	}
+	
+	/*
+	 * Proxy ARP에 수신한 메세지의 목적지 IP 정보가 있을 경우
+	 * 내 정보로 이더넷을 갱신하여 전송
+	 */
+	private boolean hasIPInProxyTable(byte[] receiveIP) {
+		for(byte[] address : proxyTable.values()) {
+			byte[] ip = new byte[4];
+			System.arraycopy(address, 0, ip, 0, 4);
+			if(Arrays.equals(ip, receiveIP)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private boolean isMine(byte[] ipAddr) {
+		for(int i = 0; i < 4; i++)
+			if(ipAddr[i] != arpHeader.ipSenderAddr.addr[i])
+				return false;
+		return true;
+	}
+	
+	private boolean isBroadCast(byte[] ethernetAddr) {
+		return Arrays.equals(BROADCAST_ETHERNET, ethernetAddr);
+	}
+	
+	private boolean isNIL(byte[] ethernetAddr){
+		return Arrays.equals(NIL_ETHERNET, ethernetAddr);
+	}
+	
 	
 	private class ARPTimer extends Thread{
 		
 		byte[] ip;
 		ARPTimer(byte[] ip){
 			this.ip = new byte[4];
-			for(int i = 0; i < 4; i++)
-				this.ip[i] = ip[i]; 
+			System.arraycopy(ip, 0, this.ip, 0, 4);
 		}
 		
 		@Override
@@ -191,7 +223,7 @@ public class ARPLayer implements BaseLayer {
 			try {
 				System.out.println("wait for 3");
 				Thread.sleep(5000);
-				if(Arrays.equals(NIL_ETHERNET,getEthernet(ip))) {
+				if(isNIL(getEthernet(ip))) {
 					deleteARPCache(ip);
 				}				
 			} catch (InterruptedException e) {
@@ -223,6 +255,11 @@ public class ARPLayer implements BaseLayer {
 		}
 	}
 	
+	/*
+	 * 가져온 헤더의 목적지를 확인
+	 * 목적지가 이미 있다면 해당 목적지의 타이머를 제거
+	 * 제거한 경우 20분으로, 아닌 경우 3분으로 새로운 타이머를 추가
+	 */
 	private void setTimer(_ARP_HEADER header) {
 		
 		Iterator<ARPTimer> iter = listArpTimer.iterator();
@@ -232,20 +269,22 @@ public class ARPLayer implements BaseLayer {
 			if(Arrays.equals(currentTimer.ip, header.ipTargetAddr.addr)){
 					currentTimer.interrupt();
 					iter.remove();
-					exist = true;
+					if(!isNIL(getEthernet(currentTimer.ip)))
+						exist = true;
 			}
 		}
 		ARPTimer arpTimer = null;
 		if(exist)
-			arpTimer = new ARPTimer(header.ipTargetAddr.addr);
-		else
 			arpTimer = new ARPReceiveTimer(header.ipTargetAddr.addr);
+		else
+			arpTimer = new ARPTimer(header.ipTargetAddr.addr);
 		
 		arpTimer.start();
 		listArpTimer.add(arpTimer);
 	}
 	
-	public boolean Send() {	
+	@Override
+	public boolean Send(byte[] input, int length) {	
 		byte[] header = arpHeader.makeHeader();
 		
 		addARPCache(arpHeader.ipTargetAddr.addr, NIL_ETHERNET);
@@ -255,38 +294,7 @@ public class ARPLayer implements BaseLayer {
 		
 		return false;
 	}
-	
-	private boolean isRequest(byte[] opcode) {
-		return (opcode[0] == (byte)0x00) && (opcode[1] == (byte)0x01);
-	}
-	
-	private boolean hasIPInProxyTable(byte[] receiveIP) {
-		for(byte[] address : proxyTable.values()) {
-			byte[] ip = new byte[4];
-			for(int i = 0; i < 4; i++)
-				ip[i] = address[i];
-			// Proxy ARP에 수신한 메세지의 목적지 IP 정보가 있을 경우
-			// 내 정보로 이더넷을 갱신하여 전송
-			if(Arrays.equals(ip, receiveIP)) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	private boolean isMine(byte[] ipAddr) {
-		for(int i = 0; i < 4; i++)
-			if(ipAddr[i] != arpHeader.ipSenderAddr.addr[i])
-				return false;
-		return true;
-	}
-	
-	private boolean isBroadCast(byte[] ethernetAddr) {
-		for(int i = 0; i < 6; i++)
-			if(ethernetAddr[i] != (byte)0xff)
-				return false;
-		return true;
-	}
+
 	
 	@Override
 	public boolean Receive(byte[] input) {
@@ -299,16 +307,12 @@ public class ARPLayer implements BaseLayer {
 		
 		// 내가 보낸 ARP가 아니라면 ARP Table에 추가
 		byte[] ip = new byte[4];
-		for(int i = 0; i < 4; i++)
-			ip[i] = receivedHeader.ipSenderAddr.addr[i];
-		
+		System.arraycopy(receivedHeader.ipSenderAddr.addr, 0, ip, 0, 4);		
 		byte[] eth = new byte[6];
-		for(int i = 0; i < 6; i++)
-			eth[i] = receivedHeader.enetSenderAddr.addr[i];
+		System.arraycopy(receivedHeader.enetSenderAddr.addr, 0, eth, 0, 6);
 		
 		addARPCache(ip,eth);
 		setTimer(receivedHeader);
-		
 
 		/*
 		 * 1. ARP 요청이고
@@ -343,6 +347,9 @@ public class ARPLayer implements BaseLayer {
 		return true;
 	}
 	
+	/*
+	 * View Update
+	 */
 	private void updateARPCachePanel() {
 		String[] stringData = new String[arpCacheTable.size()];
 		for(int i = 0; i < stringData.length; i++)
@@ -391,7 +398,7 @@ public class ARPLayer implements BaseLayer {
 	 * author : 박태현
 	 */
 	
-	public boolean addARPCache(byte[] ip, byte[] ethernet) {
+	private boolean addARPCache(byte[] ip, byte[] ethernet) {
 		
 		Iterator<ARPCache> iter = arpCacheTable.iterator();
 		

@@ -84,17 +84,6 @@ class ARPLayerTest {
 		return header;
 	}
 	
-	// ARP Table Function 동작 확인
-	@Test
-	void testARPTableBasicFlow() {
-		ARPLayer layer = ((ARPLayer)layerManager.GetLayer("test"));
-		layer.addARPCache(ip1, null);		
-		assertArrayEquals(ethNull, layer.getEthernet(ip1));
-		layer.addARPCache(ip1, eth1);
-		assertArrayEquals(eth1, layer.getEthernet(ip1));
-		layer.deleteARPCache(ip1);
-		assertArrayEquals(null, layer.getEthernet(ip1));
-	}
 	
 	// ARP Request 송신 확인
 	@Test
@@ -107,7 +96,7 @@ class ARPLayerTest {
 		layer.setEthernetSenderAddress(eth1);
 		layer.setIPSenderAddress(ip1);
 		layer.setIPTargetAddress(ip2);
-		layer.Send();
+		layer.Send(null,0);
 		
 		
 		byte[] data = ((TestLayer)layerManager.GetLayer("under")).getSendMessage();	
@@ -142,7 +131,7 @@ class ARPLayerTest {
 		layer.setIPTargetAddress(ip2);
 		
 		byte[] header = makeHeader(ip1, ip2, eth1, ethNull, (byte)0x1);
-		layer.Send();
+		layer.Send(null,0);
 		
 		byte[] sendData = ((TestLayer)layerManager.GetLayer("under")).getSendMessage();	
 		assertArrayEquals(header,sendData);

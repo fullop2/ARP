@@ -90,7 +90,7 @@ class ARPLayerWithThreadTest{
 		layer.setIPTargetAddress(ip2);
 		
 		byte[] header = makeHeader(ip1, ip2, eth1, ethNull, (byte)0x1);
-		layer.Send();
+		layer.Send(null,0);
 		
 		byte[] sendData = ((TestLayer)layerManager.GetLayer("under")).getSendMessage();	
 		assertArrayEquals(header,sendData);

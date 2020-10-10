@@ -6,6 +6,7 @@ import java.util.StringTokenizer;
 
 import NetworkLayer.ARPAppLayer;
 import NetworkLayer.ARPLayer;
+import NetworkLayer.EthernetLayer;
 import NetworkLayer.LayerManager;
 import View.ARPCachePanel;
 
@@ -24,17 +25,30 @@ public class ARPTableEventHandlers implements EventHandlers {
 					ipAddress[i] = (byte)Integer.parseInt(Integer.toHexString(Integer.parseInt(ipSplit.nextToken())),16);
 				}
 				
-				// app
-				ARPAppLayer arpAppLayer = ((ARPAppLayer)layerManager.GetLayer("ARPA"));
+				/*
+				 * 이더넷
+				 * 목적지 브로드캐스팅
+				 * 타입 ARP로 설정
+				 */
+				EthernetLayer ethernetLayer = ((EthernetLayer)layerManager.GetLayer("Ethernet"));
+				byte[] broadcast = { (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF};
+				ethernetLayer.setDstEthernetAddress(broadcast);
+				byte[] ethType = { (byte) 0x08, (byte)0x06 };
+				ethernetLayer.setEthernetType(ethType);
+				
+				/*
+				 * ARP
+				 * 요청할 ip를 ARP Table에 추가
+				 * 타겟으로 해당 ip 설정
+				 */
+				ARPLayer arpLayer = ((ARPLayer)layerManager.GetLayer("ARP"));
+				arpLayer.setIPTargetAddress(ipAddress);
 				
 				// no info for tcp,ip
 				
-				// arp
-				ARPLayer arpLayer = ((ARPLayer)layerManager.GetLayer("ARP"));
-				arpLayer.addARPCache(ipAddress, null);
-				arpLayer.setIPTargetAddress(ipAddress);
-	
-				arpAppLayer.Send();
+				// app
+				ARPAppLayer arpAppLayer = ((ARPAppLayer)layerManager.GetLayer("ARPA"));			
+				arpLayer.Send(null,0);
 			}
 		});
 		
@@ -52,7 +66,6 @@ public class ARPTableEventHandlers implements EventHandlers {
 				
 				ARPLayer arpLayer = ((ARPLayer)layerManager.GetLayer("ARP"));
 				arpLayer.deleteARPCache(ipAddress);
-				ARPCachePanel.ArpTable.remove(data);
 			}
 		});
 		
@@ -72,7 +85,6 @@ public class ARPTableEventHandlers implements EventHandlers {
 					
 					ARPLayer arpLayer = ((ARPLayer)layerManager.GetLayer("ARP"));
 					arpLayer.deleteARPCache(ipAddress);
-					ARPCachePanel.ArpTable.remove(cache);
 				}
 			}
 		});
