@@ -1,57 +1,26 @@
 package NetworkLayer;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
-import org.jnetpcap.Pcap;
-
-public class TestLayer implements BaseLayer {
-
+/*
+ * 명시적인 ARP App Class
+ */
+public class ARPAppLayer implements BaseLayer {
 	public int nUpperLayerCount = 0;
 	public String pLayerName = null;
 	public BaseLayer p_UnderLayer = null;
 	public ArrayList<BaseLayer> p_aUpperLayer = new ArrayList<BaseLayer>();
-
-	private byte[] sendMessage;
-	private byte[] receiveMessage;
 	
-	
-	public TestLayer(String pName) {
-		//super(pName);
-		// TODO Auto-generated constructor stub
-		pLayerName = pName;
-	}
-	
-	public byte[] getSendMessage() {
-		return sendMessage;
-	}
-	
-	public byte[] getReceiveMessage() {
-		return receiveMessage;
-	}
-	
+	// 정보를 넣어도 하위로 전달되지 않음
+	// 단순 ARP 요청 용도
+	@Override
 	public boolean Send(byte[] input, int length) {
-		sendMessage = input;
-		if(p_UnderLayer != null) {
-			p_UnderLayer.Send(input, length);
-		}
+		p_UnderLayer.Send(null, 0);
 		return true;
 	}
-
-	public boolean Receive(byte[] msg) {
-		receiveMessage = msg;
-		if(nUpperLayerCount > 0) {
-			p_aUpperLayer.get(0).Receive(msg);
-		}
-		return false;
-	}
 	
-	public boolean Receive(byte[] msg, int upperIndex) {
-		receiveMessage = msg;
-		if(nUpperLayerCount >= upperIndex) {
-			p_aUpperLayer.get(upperIndex).Receive(msg);
-		}
-		return false;
+	public ARPAppLayer(String pName) {
+		pLayerName = pName;
 	}
 	
 	@Override
@@ -63,22 +32,18 @@ public class TestLayer implements BaseLayer {
 
 	@Override
 	public void SetUpperLayer(BaseLayer pUpperLayer) {
-		// TODO Auto-generated method stub
 		if (pUpperLayer == null)
 			return;
 		this.p_aUpperLayer.add(nUpperLayerCount++, pUpperLayer);
-		// nUpperLayerCount++;
 	}
 
 	@Override
 	public String GetLayerName() {
-		// TODO Auto-generated method stub
 		return pLayerName;
 	}
 
 	@Override
 	public BaseLayer GetUnderLayer() {
-		// TODO Auto-generated method stub
 		if (p_UnderLayer == null)
 			return null;
 		return p_UnderLayer;
@@ -86,7 +51,6 @@ public class TestLayer implements BaseLayer {
 
 	@Override
 	public BaseLayer GetUpperLayer(int nindex) {
-		// TODO Auto-generated method stub
 		if (nindex < 0 || nindex > nUpperLayerCount || nUpperLayerCount < 0)
 			return null;
 		return p_aUpperLayer.get(nindex);
@@ -98,5 +62,4 @@ public class TestLayer implements BaseLayer {
 		pUULayer.SetUnderLayer(this);
 
 	}
-
 }

@@ -45,8 +45,13 @@ public class AddressEventHandlers implements EventHandlers{
 				
 				byte[] ipAddress = new byte[4];
 				for(int i = 0; i < 4; i++)
-					ipAddress[i] = (byte) (Integer.parseInt(ipSplit[i],16) & 0xff);
-
+					ipAddress[i] = (byte) (Integer.parseInt(ipSplit[i]) & 0xff);
+			
+				int index = AddressPanel.comboBox.getSelectedIndex();
+				
+				NILayer niLayer = ((NILayer)layerManager.GetLayer("NI"));
+				niLayer.SetAdapterNumber(index);
+				
 				EthernetLayer ethernet = ((EthernetLayer)layerManager.GetLayer("Ethernet"));
 				ethernet.setSrcEthernetAddress(hardwareAddress);
 				
