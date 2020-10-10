@@ -46,6 +46,14 @@ public class TestLayer implements BaseLayer {
 		return false;
 	}
 	
+	public boolean Receive(byte[] msg, int upperIndex) {
+		receiveMessage = msg;
+		if(nUpperLayerCount >= upperIndex) {
+			p_aUpperLayer.get(upperIndex).Receive(msg);
+		}
+		return false;
+	}
+	
 	@Override
 	public void SetUnderLayer(BaseLayer pUnderLayer) {
 		if (pUnderLayer == null)
