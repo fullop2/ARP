@@ -12,6 +12,10 @@ import org.jnetpcap.PcapIf;
 
 public class AppView extends JFrame{
 	public AppView() {
+		this(true);
+	}	
+	
+	public AppView(boolean visible) {
 
 		setTitle("ARP");
 
@@ -26,7 +30,6 @@ public class AppView extends JFrame{
 		add(new GARPPanel(800,0));
 		add(new AddressPanel(800,150));
 		
-		setVisible(true);
-
-	}	
+		setVisible(visible);
+	}
 }

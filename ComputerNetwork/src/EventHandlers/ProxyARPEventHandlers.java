@@ -87,8 +87,6 @@ public class ProxyARPEventHandlers implements EventHandlers {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-
-				
 			}
 		});
 
