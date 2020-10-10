@@ -375,9 +375,8 @@ public class ARPLayer implements BaseLayer {
 		while(iter.hasNext()) {
 			ARPCache cache = iter.next();
 			if(Arrays.equals(cache.ip.addr,ip)) {
-				cache.setEthernet(ethernet);
-				updateARPCachePanel();
-				return false;
+				iter.remove();
+				break;
 			}
 		}
 		
