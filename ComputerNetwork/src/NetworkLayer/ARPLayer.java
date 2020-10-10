@@ -58,8 +58,7 @@ public class ARPLayer implements BaseLayer {
 			}
 			else {
 				for(int i = 0; i < 6; i++) {
-//					String str = Integer.toHexString().toUpperCase();
-					stringBuffer.append(String.format("%02x ", (int)(ethernet.addr[i] & 0xff)));
+					stringBuffer.append(String.format("%02X", (ethernet.addr[i] & 0xff)).toUpperCase());
 				}
 				stringBuffer.append(" completed\n");
 			}
@@ -224,7 +223,7 @@ public class ARPLayer implements BaseLayer {
 		public void run() {
 			try {
 				System.out.println("wait for 3");
-				Thread.sleep(180000);
+				Thread.sleep(60000);
 				if(isNIL(getEthernet(ip))) {
 					deleteARPCache(ip);
 				}				
@@ -242,13 +241,10 @@ public class ARPLayer implements BaseLayer {
 		@Override
 		public void run() {
 			try {
-				if(getEthernet(ip) == null) return;
-				else {
-					System.out.println("wait for 20");
-					Thread.sleep(1200000);
-					if(getEthernet(ip) != null) {
-						deleteARPCache(ip);
-					}
+				System.out.println("wait for 20");
+				Thread.sleep(120000);
+				if(getEthernet(ip) != null) {
+					deleteARPCache(ip);
 				}
 				
 			} catch (InterruptedException e) {
@@ -265,21 +261,19 @@ public class ARPLayer implements BaseLayer {
 	private void setTimer(_ARP_HEADER header) {
 		
 		Iterator<ARPTimer> iter = listArpTimer.iterator();
-		boolean exist = false;
 		while(iter.hasNext()) {
 			ARPTimer currentTimer = iter.next();
 			if(Arrays.equals(currentTimer.ip, header.ipTargetAddr.addr)){
 					currentTimer.interrupt();
 					iter.remove();
-					if(!isNIL(getEthernet(currentTimer.ip)))
-						exist = true;
 			}
 		}
+
 		ARPTimer arpTimer = null;
-		if(exist)
-			arpTimer = new ARPReceiveTimer(header.ipTargetAddr.addr);
-		else
+		if(isNIL(getEthernet(header.ipTargetAddr.addr)))
 			arpTimer = new ARPTimer(header.ipTargetAddr.addr);
+		else
+			arpTimer = new ARPReceiveTimer(header.ipTargetAddr.addr);
 		
 		arpTimer.start();
 		listArpTimer.add(arpTimer);
@@ -294,12 +288,13 @@ public class ARPLayer implements BaseLayer {
 		
 		setTimer(arpHeader);
 		
+		System.out.println("Send ARP request");
 		return false;
 	}
 
 	
 	@Override
-	public boolean Receive(byte[] input) {
+	public synchronized boolean Receive(byte[] input) {
 		
 		_ARP_HEADER receivedHeader = new _ARP_HEADER(input);
 		
@@ -314,7 +309,7 @@ public class ARPLayer implements BaseLayer {
 		System.arraycopy(receivedHeader.enetSenderAddr.addr, 0, eth, 0, 6);
 		
 		for(byte b : eth)
-			System.out.print(String.format("%02x ", (int)b));
+			System.out.print(String.format("%02X ", b & 0xff));
 		System.out.println();
 		
 		addARPCache(ip,eth);
@@ -350,6 +345,9 @@ public class ARPLayer implements BaseLayer {
 			
 			byte[] header = receivedHeader.makeHeader();
 			p_UnderLayer.Send(header,header.length);	
+			
+
+			System.out.println("Send ARP reply");
 		}
 		
 		return true;
@@ -432,9 +430,20 @@ public class ARPLayer implements BaseLayer {
 			if(Arrays.equals(arpCache.ip.addr,ip)) {
 				arpCacheTable.remove(arpCache);
 				updateARPCachePanel();
+				
+				Iterator<ARPTimer> iterTimer = listArpTimer.iterator();
+				while(iterTimer.hasNext()) {
+					ARPTimer currentTimer = iterTimer.next();
+					if(Arrays.equals(currentTimer.ip, ip)){
+							currentTimer.interrupt();
+							iterTimer.remove();
+					}
+				}
 				return;
 			}
 		}
+		
+		
 	}
 
 	

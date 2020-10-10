@@ -117,7 +117,6 @@ public class EthernetLayer implements BaseLayer {
 	}
 
 	public boolean Receive(byte[] input) {
-		System.out.println("Ethernet Receive");
 		_ETHERNET_HEADER receiveHeader = new _ETHERNET_HEADER(input);
 		
 		if(isBroadCast(receiveHeader.enetDstAddr.addr) || isMine(receiveHeader.enetDstAddr.addr)) {
