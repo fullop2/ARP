@@ -57,8 +57,10 @@ public class ARPLayer implements BaseLayer {
 				stringBuffer.append("???????????? incompleted\n");
 			}
 			else {
-				for(int i = 0; i < 6; i++)
-					stringBuffer.append(Integer.toHexString((int)(ethernet.addr[3] & 0xff)).toUpperCase());
+				for(int i = 0; i < 6; i++) {
+//					String str = Integer.toHexString().toUpperCase();
+					stringBuffer.append(String.format("%02x ", (int)(ethernet.addr[i] & 0xff)));
+				}
 				stringBuffer.append(" completed\n");
 			}
 			
@@ -222,7 +224,7 @@ public class ARPLayer implements BaseLayer {
 		public void run() {
 			try {
 				System.out.println("wait for 3");
-				Thread.sleep(5000);
+				Thread.sleep(180000);
 				if(isNIL(getEthernet(ip))) {
 					deleteARPCache(ip);
 				}				
@@ -243,7 +245,7 @@ public class ARPLayer implements BaseLayer {
 				if(getEthernet(ip) == null) return;
 				else {
 					System.out.println("wait for 20");
-					Thread.sleep(20000);
+					Thread.sleep(1200000);
 					if(getEthernet(ip) != null) {
 						deleteARPCache(ip);
 					}
@@ -311,9 +313,15 @@ public class ARPLayer implements BaseLayer {
 		byte[] eth = new byte[6];
 		System.arraycopy(receivedHeader.enetSenderAddr.addr, 0, eth, 0, 6);
 		
+		for(byte b : eth)
+			System.out.print(String.format("%02x ", (int)b));
+		System.out.println();
+		
 		addARPCache(ip,eth);
 		setTimer(receivedHeader);
-
+		
+		System.out.println("Receive ARP");
+		
 		/*
 		 * 1. ARP 요청이고
 		 * 

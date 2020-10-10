@@ -117,15 +117,19 @@ public class EthernetLayer implements BaseLayer {
 	}
 
 	public boolean Receive(byte[] input) {
+		System.out.println("Ethernet Receive");
 		_ETHERNET_HEADER receiveHeader = new _ETHERNET_HEADER(input);
 		
 		if(isBroadCast(receiveHeader.enetDstAddr.addr) || isMine(receiveHeader.enetDstAddr.addr)) {
 			byte[] data = new byte[input.length-14];
 			System.arraycopy(input, 14, data, 0, input.length-14);
 			if(isARP(receiveHeader.type)) {
+				setEthernetType(receiveHeader.type);
+				setDstEthernetAddress(receiveHeader.enetSrcAddr.addr);
 				p_aUpperLayer.get(1).Receive(data);
 			}
 			else if(isIP(receiveHeader.type)) {
+				setEthernetType(receiveHeader.type);
 				p_aUpperLayer.get(0).Receive(data);
 			}
 		}

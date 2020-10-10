@@ -33,7 +33,7 @@ public class ApplicationController {
 		layerManager.AddLayer(new ChatAppLayer("Chat"));
 		layerManager.AddLayer(new FileAppLayer("File"));
 		layerManager.AddLayer(new ARPAppLayer("ARPA"));
-		layerManager.ConnectLayers("NI ( *Ethernet ( *IP ( *TCP ( *Chat *File *ARPA ) ) *ARP ( +IP ) ) )" );
+		layerManager.ConnectLayers("NI ( *Ethernet ( *IP ( *TCP ( *Chat *File *ARPA ) ) *ARP ( *IP ) ) )" );
 		
 		
 		// initialization event handler in here

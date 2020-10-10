@@ -45,7 +45,7 @@ public class AddressPanel extends JPanel {
 		add(lblsrcMAC);
 
 		srcMacAddress = new JTextArea();
-		srcMacAddress.setEditable(false);
+//		srcMacAddress.setEditable(false);
 		srcMacAddress.setBounds(100,45,280,20);
 		add(srcMacAddress);
 

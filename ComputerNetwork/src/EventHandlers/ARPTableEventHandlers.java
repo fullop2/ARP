@@ -43,12 +43,12 @@ public class ARPTableEventHandlers implements EventHandlers {
 				 */
 				ARPLayer arpLayer = ((ARPLayer)layerManager.GetLayer("ARP"));
 				arpLayer.setIPTargetAddress(ipAddress);
-				
+				arpLayer.setEthernetTargetAddress(broadcast);
 				// no info for tcp,ip
 				
 				// app
 				ARPAppLayer arpAppLayer = ((ARPAppLayer)layerManager.GetLayer("ARPA"));			
-				arpLayer.Send(null,0);
+				arpAppLayer.Send(null,0);
 			}
 		});
 		
@@ -57,7 +57,7 @@ public class ARPTableEventHandlers implements EventHandlers {
 			public void actionPerformed(ActionEvent arg0) {
 				String data = ARPCachePanel.ArpTable.getSelectedItem();
 				if(data == null) return;
-				String ip = ARPCachePanel.ArpIP.getText();
+				String ip = data.split(" ")[0];
 				StringTokenizer ipSplit = new StringTokenizer(ip, ".");
 				byte[] ipAddress = new byte[4];
 				for (int i = 0; i < 4; i++) {
@@ -76,7 +76,7 @@ public class ARPTableEventHandlers implements EventHandlers {
 				if(data.length == 0) return;
 				
 				for(String cache : data) {
-					String ip = ARPCachePanel.ArpIP.getText();
+					String ip = cache.split(" ")[0];
 					StringTokenizer ipSplit = new StringTokenizer(ip, ".");
 					byte[] ipAddress = new byte[4];
 					for (int i = 0; i < 4; i++) {
