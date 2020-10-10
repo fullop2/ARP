@@ -38,6 +38,19 @@ public class EthernetLayer implements BaseLayer {
 			this.enetSrcAddr = new _ETHERNET_ADDR();
 			this.type = new byte[2];
 		}
+		
+		public byte[] makeHeader() {
+			byte[] header = new byte[14];
+
+			for(int i=0; i < 6; i++) {
+				header[i] = enetDstAddr.addr[i]; 
+				header[6+i] = enetSrcAddr.addr[i];
+			}
+			header[12] = type[0];
+			header[13] = type[1];
+			
+			return header;
+		}
 	}
 
 	_ETHERNET_HEADER ethernetHeader = new _ETHERNET_HEADER();
@@ -67,7 +80,15 @@ public class EthernetLayer implements BaseLayer {
 	
 	
 	public boolean Send(byte[] input, int length) {
-		return false;
+		byte[] frame = new byte[14+length];
+		byte[] header = ethernetHeader.makeHeader();
+		
+		System.arraycopy(header, 0, frame, 0, 14);
+		System.arraycopy(input, 0, frame, 14, length);
+		
+		p_UnderLayer.Send(frame,frame.length);
+		
+		return true;
 	}
 
 	
