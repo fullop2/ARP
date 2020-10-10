@@ -27,12 +27,12 @@ public LayerManager layerManager;
 		
 		layerManager = new LayerManager();
 		
-		layerManager.AddLayer(new TestLayer("Chat"));
-		layerManager.AddLayer(new TestLayer("File"));
+		layerManager.AddLayer(new TestLayer("chat"));
+		layerManager.AddLayer(new TestLayer("file"));
 		layerManager.AddLayer(new TCPLayer("test"));
 		layerManager.AddLayer(new TestLayer("under"));
 		
-		layerManager.ConnectLayers("under ( *test ( *Chat *File ) ) ");
+		layerManager.ConnectLayers("under ( *test ( *chat *file ) ) ");
 
 	}
 
@@ -98,6 +98,41 @@ public LayerManager layerManager;
 		
 		byte[] data = ((TestLayer)layerManager.GetLayer("under")).getSendMessage();	
 		assertArrayEquals(tcpMsg,data);
+	}
+	
+	@Test
+	void testReceiveChat() {
+
+		byte[] header = makeHeader(chatPort,chatPort);
+		byte[] msg = "Hello".getBytes();
+		byte[] tcpMsg = new byte[header.length+msg.length];
+		System.arraycopy(header, 0, tcpMsg, 0, header.length);
+		System.arraycopy(msg, 0, tcpMsg, 20, msg.length);
 		
+		TestLayer underLayer = ((TestLayer)layerManager.GetLayer("under"));
+		
+		underLayer.Receive(tcpMsg);
+
+		
+		byte[] data = ((TestLayer)layerManager.GetLayer("chat")).getReceiveMessage();	
+		assertArrayEquals(msg,data);
+	}
+	
+	@Test
+	void testReceiveFile() {
+
+		byte[] header = makeHeader(filePort,filePort);
+		byte[] msg = "Hello".getBytes();
+		byte[] tcpMsg = new byte[header.length+msg.length];
+		System.arraycopy(header, 0, tcpMsg, 0, header.length);
+		System.arraycopy(msg, 0, tcpMsg, 20, msg.length);
+		
+		TestLayer underLayer = ((TestLayer)layerManager.GetLayer("under"));
+		
+		underLayer.Receive(tcpMsg);
+
+		
+		byte[] data = ((TestLayer)layerManager.GetLayer("file")).getReceiveMessage();	
+		assertArrayEquals(msg,data);
 	}
 }
