@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.StringTokenizer;
 
 import javax.swing.JTextField;
 import javax.swing.text.BadLocationException;
@@ -34,9 +35,9 @@ public class ProxyARPEventHandlers implements EventHandlers {
 				String deviceAddress = ProxyARPPanel.proxyDevice.getText();
 				String macAddress = ProxyARPPanel.proxyOutMAC.getText();
 				String ipStringAddress = ProxyARPPanel.proxyInIP.getText();
-				String[] ipSplit = ipStringAddress.split("\\.");
+								StringTokenizer ipSplit = new StringTokenizer(ipStringAddress, ".");
 
-				if (deviceAddress.trim().length()!=0 && macAddress .trim().length()!=0&&ipStringAddress.trim().length()!=0&&macAddress.trim().length()==12&&ipSplit.length==4) {
+				if (deviceAddress.trim().length()!=0 && macAddress .trim().length()!=0&&ipStringAddress.trim().length()!=0&&macAddress.trim().length()==12&&ipSplit.countTokens()==4) {
 					byte[] hardwareAddress = new byte[6];
 					for (int i = 0; i < 6; i++)
 						hardwareAddress[i] = (byte) (Integer.parseInt(
@@ -44,7 +45,7 @@ public class ProxyARPEventHandlers implements EventHandlers {
 
 					byte[] ipAddress = new byte[4];
 					for (int i = 0; i < 4; i++)
-						ipAddress[i] = (byte) (Integer.parseInt(ipSplit[i], 16) & 0xff);
+						ipAddress[i] = (byte)Integer.parseInt(Integer.toHexString(Integer.parseInt(ipSplit.nextToken())),16);
 
 					ARPLayer arp = ((ARPLayer) layerManager.GetLayer("ARP"));
 					arp.setProxyTable(deviceAddress, ipAddress, hardwareAddress);
@@ -87,8 +88,6 @@ public class ProxyARPEventHandlers implements EventHandlers {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-
-				
 			}
 		});
 

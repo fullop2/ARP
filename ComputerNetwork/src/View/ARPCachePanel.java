@@ -1,5 +1,7 @@
 package View;
 
+import java.awt.List;
+
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -9,7 +11,7 @@ import javax.swing.JTextField;
 
 public class ARPCachePanel extends JPanel {
 	
-	public static JTextArea ArpTable;
+	public static List ArpTable;
 	public static JTextField ArpIP;
 	
 	public static JButton btnArpDeleteOne;
@@ -23,9 +25,8 @@ public class ARPCachePanel extends JPanel {
 		setBorder(BorderFactory.createTitledBorder("ARP Cache"));
 		setLayout(null);
 		
-		ArpTable = new JTextArea();
+		ArpTable = new List();
 		ArpTable.setBounds(15,15,370,200);
-		ArpTable.setEditable(false);
 		add(ArpTable);
 		
 		btnArpDeleteOne = new JButton("Item Delete");

@@ -30,32 +30,59 @@ public class AddressEventHandlers implements EventHandlers{
 		 * IP와 MAC을 Layer Model에 등록
 		 */
 		AddressPanel.btnSetting.addActionListener(new ActionListener() {
-
+			
+			boolean isSetting = true;
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				
-				String macAddress = AddressPanel.srcMacAddress.getText();			
-				byte[] hardwareAddress = new byte[6];
+				if(isSetting) {
+					String macAddress = AddressPanel.srcMacAddress.getText();			
+					byte[] hardwareAddress = new byte[6];
+					
+					for(int i = 0; i < 6; i++)
+						hardwareAddress[i] = (byte) (Integer.parseInt(macAddress.substring(i*2, i*2+2),16) & 0xff);
+					
+					String ipStringAddress = AddressPanel.srcIPAddress.getText();
+					String[] ipSplit = ipStringAddress.split("\\.");
+					
+					byte[] ipAddress = new byte[4];
+					for(int i = 0; i < 4; i++)
+						ipAddress[i] = (byte) (Integer.parseInt(ipSplit[i]) & 0xff);
 				
-				for(int i = 0; i < 6; i++)
-					hardwareAddress[i] = (byte) (Integer.parseInt(macAddress.substring(i*2, i*2+2),16) & 0xff);
-				
-				String ipStringAddress = AddressPanel.srcIPAddress.getText();
-				String[] ipSplit = ipStringAddress.split("\\.");
-				
-				byte[] ipAddress = new byte[4];
-				for(int i = 0; i < 4; i++)
-					ipAddress[i] = (byte) (Integer.parseInt(ipSplit[i],16) & 0xff);
-
-				EthernetLayer ethernet = ((EthernetLayer)layerManager.GetLayer("Ethernet"));
-				ethernet.setSrcEthernetAddress(hardwareAddress);
-				
-				ARPLayer arp = ((ARPLayer)layerManager.GetLayer("ARP"));
-				arp.setEthernetSenderAddress(hardwareAddress);
-				arp.setIPSenderAddress(ipAddress);
-				
-				IPLayer ip = ((IPLayer)layerManager.GetLayer("IP"));
-				ip.setIPSrcAddr(ipAddress);
+					int index = AddressPanel.comboBox.getSelectedIndex();
+					
+					NILayer niLayer = ((NILayer)layerManager.GetLayer("NI"));
+					niLayer.SetAdapterNumber(index);
+					
+					EthernetLayer ethernet = ((EthernetLayer)layerManager.GetLayer("Ethernet"));
+					ethernet.setSrcEthernetAddress(hardwareAddress);
+					
+					ARPLayer arp = ((ARPLayer)layerManager.GetLayer("ARP"));
+					arp.setEthernetSenderAddress(hardwareAddress);
+					arp.setIPSenderAddress(ipAddress);
+					
+					IPLayer ip = ((IPLayer)layerManager.GetLayer("IP"));
+					ip.setIPSrcAddr(ipAddress);
+					
+					AddressPanel.srcMacAddress.setEditable(false);
+					AddressPanel.srcIPAddress.setEditable(false);
+					AddressPanel.comboBox.setEnabled(false);
+					
+					AddressPanel.btnSetting.setText("Reset");
+					isSetting = false;
+				}
+				else {
+					NILayer niLayer = ((NILayer)layerManager.GetLayer("NI"));
+					niLayer.stopReceive();					
+					
+					AddressPanel.btnSetting.setText("Setting");
+					
+					AddressPanel.srcMacAddress.setEditable(true);
+					AddressPanel.srcIPAddress.setEditable(true);
+					AddressPanel.comboBox.setEnabled(true);
+					
+					isSetting = true;
+				}
 			}
 			
 		});
