@@ -200,6 +200,7 @@ public class ARPLayer implements BaseLayer {
 			byte[] ip = new byte[4];
 			System.arraycopy(address, 0, ip, 0, 4);
 			if(Arrays.equals(ip, receiveIP)) {
+				System.out.println("proxy Table에 해당 IP 존재");
 				return true;
 			}
 		}
