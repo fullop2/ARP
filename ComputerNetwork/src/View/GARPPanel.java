@@ -8,9 +8,9 @@ import javax.swing.JTextField;
 
 public class GARPPanel extends JPanel {
 	
-	static JLabel lblGARPHWAddr;
-	static JTextField GARPMacAddr;
-	static JButton btnGARPSend;	
+	public static JLabel lblGARPHWAddr;
+	public static JTextField GARPMacAddr;
+	public static JButton btnGARPSend;	
 	
 	public GARPPanel(int x, int y) {
 		setBounds(x,y,400,150);
