@@ -15,8 +15,14 @@ class ARPLayerTest {
 
 	public LayerManager layerManager;
 	
-	public byte[] ip1,ip2,ip3;
-	public byte[] eth1,eth2,eth3,ethNull,ethBroadCast;
+	byte[] ip1 = {(byte)192,(byte)168,(byte)0,(byte)1};
+	byte[] ip2 = {(byte)192,(byte)168,(byte)0,(byte)2};
+	byte[] ip3 = {(byte)192,(byte)168,(byte)0,(byte)3};
+	byte[] eth1 = {(byte)0xAA,(byte)0xAA,(byte)0xAA,(byte)0xAA,(byte)0xAA,(byte)0xAA};
+	byte[] eth2 = {(byte)0xBB,(byte)0xBB,(byte)0xBB,(byte)0xBB,(byte)0xBB,(byte)0xBB};
+	byte[] eth3 = {(byte)0xCC,(byte)0xCC,(byte)0xCC,(byte)0xCC,(byte)0xCC,(byte)0xCC};
+	byte[] ethNull = {0x00,0x00,0x00,0x00,0x00,0x00};
+	byte[] ethBroadCast = {(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF};
 	
 	AppView view = new AppView(false);
 	
@@ -33,29 +39,6 @@ class ARPLayerTest {
 		
 		layerManager.ConnectLayers("under ( *test ( *upper ) ) ");
 		
-		ip1=new byte[4];
-		ip1[0] = (byte)192; ip1[1] = (byte)168; ip1[2] = 0; ip1[3] = 1;
-		
-		ip2=new byte[4];
-		ip2[0] = (byte)192; ip2[1] = (byte)168; ip2[2] = 0; ip2[3] = 2;
-		
-		ip3=new byte[4];
-		ip3[0] = (byte)192; ip3[1] = (byte)168; ip3[2] = 0; ip3[3] = 3;
-		
-		eth1 = new byte[6];
-		setEthernet(eth1,(byte)0xAA);
-		
-		eth2 = new byte[6];
-		setEthernet(eth2,(byte)0xBB);
-		
-		eth3 = new byte[6];
-		setEthernet(eth3,(byte)0xCC);
-		
-		ethNull = new byte[6];
-		setEthernet(ethNull,(byte)0);
-		
-		ethBroadCast = new byte[6];
-		setEthernet(ethBroadCast, (byte)0xff);
 	}
 	
 	void setEthernet(byte[] eth, byte addr) {
@@ -121,6 +104,48 @@ class ARPLayerTest {
 		assertArrayEquals(eth2,eth);			
 	}
 
+	
+	// GARP Request 송신 확인
+	@Test
+	void testSendGARP() {
+
+		byte[] header = makeHeader(ip1,ip1,eth1,ethNull,(byte) 0x1);
+		
+		ARPLayer layer = ((ARPLayer)layerManager.GetLayer("test"));
+		
+		layer.setEthernetSenderAddress(eth1);
+		layer.setIPSenderAddress(ip1);
+		layer.setIPTargetAddress(ip1);
+		layer.Send(null,0);
+		
+		
+		byte[] data = ((TestLayer)layerManager.GetLayer("under")).getSendMessage();	
+		assertArrayEquals(header,data);
+		
+	}
+	
+	// GARP Request 수신 확인
+	@Test
+	void testReceiveGARP() {
+		ARPLayer layer = ((ARPLayer)layerManager.GetLayer("test"));
+		
+		layer.setEthernetSenderAddress(eth2);
+		layer.setIPSenderAddress(ip2);
+		
+		byte[] header = makeHeader(ip1, ip1, eth1, ethNull, (byte)0x01); 
+					
+		layer.Receive(header);
+		
+		byte[] eth = layer.getEthernet(ip1);	
+		assertArrayEquals(eth1,eth);	
+		
+		byte[] sendData = ((TestLayer)layerManager.GetLayer("under")).getSendMessage();	
+		
+		byte[] replyHeader = makeHeader(ip2, ip1, eth2, eth1, (byte)0x02); 
+		
+		assertArrayEquals(replyHeader,sendData);
+	}
+	
 	// ARP Request 송신 후 ARP Reply 수신 확인
 	@Test
 	void testSettingAndReceive() {
@@ -168,31 +193,5 @@ class ARPLayerTest {
 		assertArrayEquals(header, sendData); // reply is valid
 	}
 
-	@Test
-	void testReceiveARPinProxy() throws InterruptedException {
-		
-		view.setVisible(true);
-		
-		ARPLayer layer = ((ARPLayer)layerManager.GetLayer("test"));
-		layer.setEthernetSenderAddress(eth1);
-		layer.setIPSenderAddress(ip1);
-		layer.setIPTargetAddress(ip2);
-		
-		layer.setProxyTable("0", ip3, eth3);
-		
-		byte[] header = makeHeader(ip2, ip3, eth2, ethBroadCast, (byte)0x1); // request
-		layer.Receive(header);
-		
-		byte[] eth = layer.getEthernet(ip2);	
-		assertArrayEquals(eth2,eth);	
-		
-		header = makeHeader(ip3, ip2, eth1, eth2, (byte)0x2); // reply
-		
-		TestLayer under = ((TestLayer)layerManager.GetLayer("under"));	
-		byte[] sendData = under.getSendMessage();
-		
-		assertArrayEquals(header, sendData); // reply is valid
-		
-		Thread.sleep(3000);
-	}
+
 }

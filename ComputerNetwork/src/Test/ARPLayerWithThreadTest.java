@@ -14,8 +14,14 @@ class ARPLayerWithThreadTest{
 
 	public LayerManager layerManager;
 	
-	public byte[] ip1,ip2,ip3;
-	public byte[] eth1,eth2,eth3,ethNull;
+	byte[] ip1 = {(byte)192,(byte)168,(byte)0,(byte)1};
+	byte[] ip2 = {(byte)192,(byte)168,(byte)0,(byte)2};
+	byte[] ip3 = {(byte)192,(byte)168,(byte)0,(byte)3};
+	byte[] eth1 = {(byte)0xAA,(byte)0xAA,(byte)0xAA,(byte)0xAA,(byte)0xAA,(byte)0xAA};
+	byte[] eth2 = {(byte)0xBB,(byte)0xBB,(byte)0xBB,(byte)0xBB,(byte)0xBB,(byte)0xBB};
+	byte[] eth3 = {(byte)0xCC,(byte)0xCC,(byte)0xCC,(byte)0xCC,(byte)0xCC,(byte)0xCC};
+	byte[] ethNull = {0x00,0x00,0x00,0x00,0x00,0x00};
+	byte[] ethBroadCast = {(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF};
 	
 	AppView view = new AppView();
 	
@@ -32,26 +38,6 @@ class ARPLayerWithThreadTest{
 		
 		layerManager.ConnectLayers("under ( *test ( *upper ) ) ");
 		
-		ip1=new byte[4];
-		ip1[0] = (byte)192; ip1[1] = (byte)168; ip1[2] = 0; ip1[3] = 1;
-		
-		ip2=new byte[4];
-		ip2[0] = (byte)192; ip2[1] = (byte)168; ip2[2] = 0; ip2[3] = 2;
-		
-		ip3=new byte[4];
-		ip3[0] = (byte)192; ip3[1] = (byte)168; ip3[2] = 0; ip3[3] = 3;
-		
-		eth1 = new byte[6];
-		setEthernet(eth1,(byte)0xAA);
-		
-		eth2 = new byte[6];
-		setEthernet(eth2,(byte)0xBB);
-		
-		eth3 = new byte[6];
-		setEthernet(eth3,(byte)0xCC);
-		
-		ethNull = new byte[6];
-		setEthernet(ethNull,(byte)0);
 	}
 	
 	void setEthernet(byte[] eth, byte addr) {
@@ -106,6 +92,33 @@ class ARPLayerWithThreadTest{
 		
 		eth = layer.getEthernet(ip2);	
 		assertArrayEquals(null,eth);
-	}					
-
+	}
+	
+	@Test
+	void testReceiveARPinProxy() throws InterruptedException {
+		
+		view.setVisible(true);
+		
+		ARPLayer layer = ((ARPLayer)layerManager.GetLayer("test"));
+		layer.setEthernetSenderAddress(eth1);
+		layer.setIPSenderAddress(ip1);
+		layer.setIPTargetAddress(ip2);
+		
+		layer.setProxyTable("0", ip3, eth3);
+		
+		byte[] header = makeHeader(ip2, ip3, eth2, ethBroadCast, (byte)0x1); // request
+		layer.Receive(header);
+		
+		byte[] eth = layer.getEthernet(ip2);	
+		assertArrayEquals(eth2,eth);	
+		
+		header = makeHeader(ip3, ip2, eth1, eth2, (byte)0x2); // reply
+		
+		TestLayer under = ((TestLayer)layerManager.GetLayer("under"));	
+		byte[] sendData = under.getSendMessage();
+		
+		assertArrayEquals(header, sendData); // reply is valid
+		
+		Thread.sleep(3000);
+	}
 }

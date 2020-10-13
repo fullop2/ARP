@@ -249,9 +249,12 @@ public class ARPLayer implements BaseLayer {
 	
 	@Override
 	public boolean Send(byte[] input, int length) {	
-		byte[] header = arpHeader.makeHeader();
 		
-		addARPCache(arpHeader.ipTargetAddr.addr, NIL_ETHERNET);
+		if(!isMine(arpHeader.ipTargetAddr.addr)) {// 메세지 수신자가 나인 경우 : GARP
+			addARPCache(arpHeader.ipTargetAddr.addr, NIL_ETHERNET);
+		}
+		
+		byte[] header = arpHeader.makeHeader();
 		p_UnderLayer.Send(header,header.length);
 		
 		System.out.println("Send ARP request");
@@ -287,16 +290,18 @@ public class ARPLayer implements BaseLayer {
 		 * 
 		 * 1) 나에게 온 요청일 경우
 		 * 2) 브로드캐스트이고 목적지가 내 프록시 테이블에 있을 경우 
+		 * 3) GARP라서 Ethernet Target이 0일 경우 
 		 * 
 		 * 내 맥을 넣어서 답장
 		 */
 		if(isRequest(receivedHeader.opcode) && 
-			(isMine(receivedHeader.ipTargetAddr.addr) || 
-			   (isBroadCast(receivedHeader.enetTargetAddr.addr) && 
-			    hasIPInProxyTable(receivedHeader.ipTargetAddr.addr)))) 
+			(isNIL(receivedHeader.enetTargetAddr.addr) ||
+			 isMine(receivedHeader.ipTargetAddr.addr) || 
+			 (isBroadCast(receivedHeader.enetTargetAddr.addr) && hasIPInProxyTable(receivedHeader.ipTargetAddr.addr)))) 
 		{	
 			receivedHeader.opcode[1] = 0x02; // make reply
 			receivedHeader.enetTargetAddr = arpHeader.enetSenderAddr;
+			receivedHeader.ipTargetAddr = arpHeader.ipSenderAddr;
 			
 			// swap sender and target
 			_IP_ADDR ipSender = receivedHeader.ipSenderAddr;
@@ -373,14 +378,17 @@ public class ARPLayer implements BaseLayer {
 		
 		Iterator<ARPCache> iter = arpCacheTable.iterator();
 		
+		byte[] deletedEthernet = null;
 		while(iter.hasNext()) {
 			ARPCache cache = iter.next();
 			if(Arrays.equals(cache.ip.addr,ip)) {
+				deletedEthernet = cache.ethernet.addr;
 				iter.remove();
 				break;
 			}
 		}
-		
+		if(isNIL(ethernet) && !isNIL(deletedEthernet))
+			ethernet = deletedEthernet;
 		arpCacheTable.add(new ARPCache(ip,ethernet));
 		updateARPCachePanel();
 		return true;
