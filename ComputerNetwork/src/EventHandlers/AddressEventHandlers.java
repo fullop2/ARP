@@ -149,6 +149,7 @@ public class AddressEventHandlers implements EventHandlers{
 					byte[] ethernetAddress = arp.getEthernet(ipAddress);
 					if(ethernetAddress == null || Arrays.equals(ethNIL, ethernetAddress)) {
 						System.out.println("IP에 대응하는 MAC을 찾지 못했습니다");
+						JOptionPane.showMessageDialog(null, "[ERR] IP에 대응하는 MAC을 찾지 못했습니다");
 						return;
 					}
 					

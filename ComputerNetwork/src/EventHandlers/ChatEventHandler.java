@@ -4,6 +4,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
 
+import javax.swing.JOptionPane;
+
 import NetworkLayer.ARPLayer;
 import NetworkLayer.ChatAppLayer;
 import NetworkLayer.EthernetLayer;
@@ -38,6 +40,7 @@ public class ChatEventHandler implements EventHandlers {
 				byte[] ethernetAddr = arpLayer.getEthernet(ipLayer.getIPDstAddr());
 				if(ethernetAddr == null || Arrays.equals(ethNIL,ethernetAddr)) {
 					System.out.println("[ERR] 현재 IP에 매칭되는 MAC이 없습니다 다시 확인하세요");
+					JOptionPane.showMessageDialog(null, "[ERR] 현재 IP에 매칭되는 MAC이 없습니다 다시 확인하세요");
 					AddressPanel.btnSettingDstAddress.getActionListeners()[0].actionPerformed(arg0);
 				}
 				else {
