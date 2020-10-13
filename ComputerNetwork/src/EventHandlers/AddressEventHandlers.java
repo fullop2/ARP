@@ -160,14 +160,14 @@ public class AddressEventHandlers implements EventHandlers{
 					
 					AddressPanel.btnSettingSrcAddress.setText("Reset");
 					AddressPanel.dstIPAddress.setEditable(false);
-					ChatPanel.chatSendButton.setEnabled(true);					
+					ChatPanel.btnChatSend.setEnabled(true);					
 					
 					isSetting = false;
 				}
 				else {		
 					AddressPanel.btnSettingSrcAddress.setText("Setting");
 					AddressPanel.dstIPAddress.setEditable(true);
-					ChatPanel.chatSendButton.setEnabled(false);
+					ChatPanel.btnChatSend.setEnabled(false);
 					isSetting = true;
 				}
 			}
