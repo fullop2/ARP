@@ -25,9 +25,9 @@ public class ChatEventHandler implements EventHandlers {
 			byte[] ethNIL = {0,0,0,0,0,0};
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				String msg = ChatPanel.chattingWrite.getText();
+				String msg = new String(ChatPanel.chattingWrite.getText());
 				byte[] byteMsg = msg.getBytes();
- 				ChatPanel.chattingArea.append("[SEND] : "+msg+"\n");
+				ChatPanel.chattingWrite.setText("");
 				
 				EthernetLayer ethernetLayer = ((EthernetLayer)layerManager.GetLayer("Ethernet"));
 				ethernetLayer.setEthernetType(ipType);	
@@ -39,16 +39,14 @@ public class ChatEventHandler implements EventHandlers {
 				if(ethernetAddr == null || Arrays.equals(ethNIL,ethernetAddr)) {
 					System.out.println("[ERR] 현재 IP에 매칭되는 MAC이 없습니다 다시 확인하세요");
 					AddressPanel.btnSettingDstAddress.getActionListeners()[0].actionPerformed(arg0);
-					return;
 				}
-					
-				TCPLayer tcpLayer =  ((TCPLayer)layerManager.GetLayer("TCP"));
-				tcpLayer.setPort(port);
-				
-				
-				ChatAppLayer chatAppLayer = ((ChatAppLayer)layerManager.GetLayer("Chat"));
-				chatAppLayer.Send(byteMsg,byteMsg.length);
-				ChatPanel.chattingWrite.setText("");
+				else {
+					ChatPanel.chattingArea.append("[SEND] : "+msg+"\n");
+					TCPLayer tcpLayer =  ((TCPLayer)layerManager.GetLayer("TCP"));
+					tcpLayer.setPort(port);				
+					ChatAppLayer chatAppLayer = ((ChatAppLayer)layerManager.GetLayer("Chat"));
+					chatAppLayer.Send(byteMsg,byteMsg.length);
+				}
 			}
 		});
 	}
