@@ -18,7 +18,10 @@ import NetworkLayer.EthernetLayer;
 import NetworkLayer.IPLayer;
 import NetworkLayer.LayerManager;
 import NetworkLayer.NILayer;
+import View.ARPCachePanel;
 import View.AddressPanel;
+import View.ChatPanel;
+import View.GARPPanel;
 
 public class AddressEventHandlers implements EventHandlers{
 	
@@ -29,7 +32,7 @@ public class AddressEventHandlers implements EventHandlers{
 		 * author : Taehyun
 		 * IP와 MAC을 Layer Model에 등록
 		 */
-		AddressPanel.btnSetting.addActionListener(new ActionListener() {
+		AddressPanel.btnSettingSrcAddress.addActionListener(new ActionListener() {
 			
 			boolean isSetting = true;
 			@Override
@@ -68,18 +71,24 @@ public class AddressEventHandlers implements EventHandlers{
 					AddressPanel.srcIPAddress.setEditable(false);
 					AddressPanel.comboBox.setEnabled(false);
 					
-					AddressPanel.btnSetting.setText("Reset");
+					GARPPanel.btnGARPSend.setEnabled(true);		
+					ARPCachePanel.btnArpSend.setEnabled(true);
+					
+					AddressPanel.btnSettingSrcAddress.setText("Reset");
 					isSetting = false;
 				}
 				else {
 					NILayer niLayer = ((NILayer)layerManager.GetLayer("NI"));
 					niLayer.stopReceive();					
 					
-					AddressPanel.btnSetting.setText("Setting");
+					AddressPanel.btnSettingSrcAddress.setText("Setting");
 					
 					AddressPanel.srcMacAddress.setEditable(true);
 					AddressPanel.srcIPAddress.setEditable(true);
 					AddressPanel.comboBox.setEnabled(true);
+					
+					GARPPanel.btnGARPSend.setEnabled(false);	
+					ARPCachePanel.btnArpSend.setEnabled(false);
 					
 					isSetting = true;
 				}
@@ -112,6 +121,54 @@ public class AddressEventHandlers implements EventHandlers{
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
+				}
+			}
+			
+		});
+		
+		AddressPanel.btnSettingDstAddress.addActionListener(new ActionListener() {
+			
+			byte[] ethNIL = { 0,0,0,0,0,0};
+			boolean isSetting = true;
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				if(isSetting) {
+					
+					String ipStringAddress = AddressPanel.dstIPAddress.getText();
+					String[] ipSplit = ipStringAddress.split("\\.");
+					
+					byte[] ipAddress = new byte[4];
+					for(int i = 0; i < 4; i++)
+						ipAddress[i] = (byte) (Integer.parseInt(ipSplit[i]) & 0xff);
+				
+	
+					
+					ARPLayer arp = ((ARPLayer)layerManager.GetLayer("ARP"));
+					
+					byte[] ethernetAddress = arp.getEthernet(ipAddress);
+					if(ethernetAddress == null || Arrays.equals(ethNIL, ethernetAddress)) {
+						System.out.println("IP에 대응하는 MAC을 찾지 못했습니다");
+						return;
+					}
+					
+					arp.setEthernetTargetAddress(ethernetAddress);
+					arp.setIPTargetAddress(ipAddress);
+					
+					IPLayer ip = ((IPLayer)layerManager.GetLayer("IP"));
+					ip.setIPDstAddr(ipAddress);
+					
+					AddressPanel.btnSettingSrcAddress.setText("Reset");
+					AddressPanel.dstIPAddress.setEditable(false);
+					ChatPanel.chatSendButton.setEnabled(true);					
+					
+					isSetting = false;
+				}
+				else {		
+					AddressPanel.btnSettingSrcAddress.setText("Setting");
+					AddressPanel.dstIPAddress.setEditable(true);
+					ChatPanel.chatSendButton.setEnabled(false);
+					isSetting = true;
 				}
 			}
 			
