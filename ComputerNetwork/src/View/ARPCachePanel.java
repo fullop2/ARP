@@ -47,6 +47,7 @@ public class ARPCachePanel extends JPanel {
 		
 		btnArpSend = new JButton("Send");
 		btnArpSend.setBounds(310,260,65,25);
+		btnArpSend.setEnabled(false);
 		add(btnArpSend);
 
 	}

@@ -27,6 +27,7 @@ public class GARPPanel extends JPanel {
 		
 		btnGARPSend = new JButton("Send");
 		btnGARPSend.setBounds(140,40,120,20);
+		btnGARPSend.setEnabled(false);
 		add(btnGARPSend);
 	}
 }

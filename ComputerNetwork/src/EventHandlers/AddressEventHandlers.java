@@ -158,17 +158,18 @@ public class AddressEventHandlers implements EventHandlers{
 					IPLayer ip = ((IPLayer)layerManager.GetLayer("IP"));
 					ip.setIPDstAddr(ipAddress);
 					
-					AddressPanel.btnSettingSrcAddress.setText("Reset");
+					AddressPanel.btnSettingDstAddress.setText("Reset");
 					AddressPanel.dstIPAddress.setEditable(false);
 					ChatPanel.btnChatSend.setEnabled(true);					
 					
 					isSetting = false;
 				}
 				else {		
-					AddressPanel.btnSettingSrcAddress.setText("Setting");
+					AddressPanel.btnSettingDstAddress.setText("Setting");
 					AddressPanel.dstIPAddress.setEditable(true);
 					ChatPanel.btnChatSend.setEnabled(false);
 					isSetting = true;
+					
 				}
 			}
 			
