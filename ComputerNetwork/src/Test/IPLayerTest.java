@@ -142,8 +142,8 @@ class IPLayerTest {
 		header[2] = (byte)((length >> 8) & 0xff);
 		header[3] = (byte)(length & 0xff);
 		header[6] = (byte) (((0x02 << 5) & 0xe0) | (0x00 & 0x5)); 
-		header[10] = 0x7F;
-		header[11] = 0x06;
+		header[8] = 0x7F;
+		header[9] = 0x06;
 		
 		for(int i = 0; i < 4; i++) {
 			header[12+i] = dst[i];
