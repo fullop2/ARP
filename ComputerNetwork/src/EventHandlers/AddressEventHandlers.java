@@ -71,6 +71,7 @@ public class AddressEventHandlers implements EventHandlers{
 					AddressPanel.srcIPAddress.setEditable(false);
 					AddressPanel.comboBox.setEnabled(false);
 					
+					GARPPanel.btnGARPSend.setEnabled(true);		
 					ARPCachePanel.btnArpSend.setEnabled(true);
 					
 					AddressPanel.btnSettingSrcAddress.setText("Reset");
@@ -86,6 +87,7 @@ public class AddressEventHandlers implements EventHandlers{
 					AddressPanel.srcIPAddress.setEditable(true);
 					AddressPanel.comboBox.setEnabled(true);
 					
+					GARPPanel.btnGARPSend.setEnabled(false);	
 					ARPCachePanel.btnArpSend.setEnabled(false);
 					
 					isSetting = true;
