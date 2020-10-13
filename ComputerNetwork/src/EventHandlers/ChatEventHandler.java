@@ -28,6 +28,7 @@ public class ChatEventHandler implements EventHandlers {
 				
 				TCPLayer tcpLayer =  ((TCPLayer)layerManager.GetLayer("TCP"));
 				tcpLayer.setPort(port);
+				
 				ChatAppLayer chatAppLayer = ((ChatAppLayer)layerManager.GetLayer("Chat"));
 				chatAppLayer.Send(byteMsg,byteMsg.length);
 				ChatPanel.chattingWrite.setText("");
