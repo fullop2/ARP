@@ -129,7 +129,7 @@ public class AddressEventHandlers implements EventHandlers{
 		AddressPanel.btnSettingDstAddress.addActionListener(new ActionListener() {
 			
 			byte[] ethNIL = { 0,0,0,0,0,0};
-			boolean isSetting = true;
+			public boolean isSetting = true;
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				
