@@ -10,7 +10,7 @@ public class ChatPanel extends JPanel {
 
 	public static JTextField chattingWrite;
 	public static JTextArea chattingArea;
-	public static JButton chatSendButton;
+	public static JButton btnChatSend;
 	
 	public ChatPanel(int x, int y) {
 		setBounds(x,y,400,300);
@@ -28,8 +28,8 @@ public class ChatPanel extends JPanel {
 		add(chattingWrite);
 		chattingWrite.setColumns(10);
 		
-		chatSendButton = new JButton("Send");		
-		chatSendButton.setBounds(315,270,70,20);
-		add(chatSendButton);
+		btnChatSend = new JButton("Send");		
+		btnChatSend.setBounds(315,270,70,20);
+		add(btnChatSend);
 	}
 }

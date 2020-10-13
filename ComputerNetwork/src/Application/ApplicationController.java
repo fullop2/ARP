@@ -42,6 +42,7 @@ public class ApplicationController {
 		listEventHandlers.add(new ARPTableEventHandlers());
 		listEventHandlers.add(new GARPEventHandlers());
 		listEventHandlers.add(new ProxyARPEventHandlers());
+		listEventHandlers.add(new ChatEventHandler());
 		
 		for(EventHandlers eventHandlers : listEventHandlers) {
 			eventHandlers.setEventHandlers(layerManager);

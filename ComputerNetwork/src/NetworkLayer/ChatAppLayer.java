@@ -2,6 +2,8 @@ package NetworkLayer;
 
 import java.util.ArrayList;
 
+import Application.ApplicationController;
+
 public class ChatAppLayer implements BaseLayer{
 	public int nUpperLayerCount = 0;
 	public String pLayerName = null;
@@ -45,19 +47,18 @@ public class ChatAppLayer implements BaseLayer{
 		return null;		
 	}
 	
-    public boolean Send(byte[] input, int length) {     	 
-    	
-		return false;
+	public boolean Send(byte[] input, int length) {     	 
+    	if(length == 0) return false;
+    	System.out.println("Send Msg");
+		return p_UnderLayer.Send(input,length);
 	}
-//    
-//    public byte[] RemoveCappHeader(byte[] input, int length){
-//    
-//    }
+
            
 	public boolean Receive(byte[] input){
-	
+		
+		ApplicationController.receiveMsg(new String(input));
 		return true;
-	}
+	}	 
 
 	@Override
 	public void SetUnderLayer(BaseLayer pUnderLayer) {
