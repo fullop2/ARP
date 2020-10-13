@@ -19,6 +19,7 @@ public class ARPTableEventHandlers implements EventHandlers {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				String ip = ARPCachePanel.ArpIP.getText();
+				// ip 앞 뒤 공백 제거 
 				ip = ip.trim();
 				StringTokenizer ipSplit = new StringTokenizer(ip, ".");
 				byte[] ipAddress = new byte[4];
@@ -27,10 +28,11 @@ public class ARPTableEventHandlers implements EventHandlers {
 				}
 				
 				/*
-				 * �씠�뜑�꽬
-				 * 紐⑹쟻吏� 釉뚮줈�뱶罹먯뒪�똿
-				 * ���엯 ARP濡� �꽕�젙
+				 * 이더넷
+				 * 목적지 브로드캐스팅
+				 * 타입 ARP로 설정
 				 */
+				
 				EthernetLayer ethernetLayer = ((EthernetLayer)layerManager.GetLayer("Ethernet"));
 				byte[] broadcast = { (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF};
 				ethernetLayer.setDstEthernetAddress(broadcast);
@@ -39,9 +41,10 @@ public class ARPTableEventHandlers implements EventHandlers {
 				
 				/*
 				 * ARP
-				 * �슂泥��븷 ip瑜� ARP Table�뿉 異붽�
-				 * ��寃잛쑝濡� �빐�떦 ip �꽕�젙
+				 * 요청할 ip를 ARP Table에 추가
+				 * 타겟으로 해당 ip 설정
 				 */
+			
 				ARPLayer arpLayer = ((ARPLayer)layerManager.GetLayer("ARP"));
 				arpLayer.setIPTargetAddress(ipAddress);
 				arpLayer.setEthernetTargetAddress(broadcast);
