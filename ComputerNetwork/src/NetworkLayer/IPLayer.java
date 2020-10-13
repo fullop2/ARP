@@ -73,10 +73,12 @@ public class IPLayer implements BaseLayer {
 			fragmentOffset[0] = (byte) (header[6] & 0x1f);
 			fragmentOffset[1] = header[7];
 			
-			headerChecksum[0] = header[8];
-			headerChecksum[1] = header[9];
-			timeToLive = header[10];
-			protocol = header[11];
+			timeToLive = header[8];
+			protocol = header[9];
+			
+			headerChecksum[0] = header[10];
+			headerChecksum[1] = header[11];
+
 			
 			System.arraycopy(header, 12, ipDstAddr.addr, 0, 4);
 			System.arraycopy(header, 16, ipSrcAddr.addr, 0, 4);
@@ -106,10 +108,12 @@ public class IPLayer implements BaseLayer {
 			header[6] = (byte) (((flag << 5) & 0xe0) | ((fragmentOffset[0]) & 0x1f)); 
 			header[7] = fragmentOffset[1];
 			
-			header[8] = headerChecksum[0];
-			header[9] = headerChecksum[1];
-			header[10] = timeToLive;
-			header[11] = protocol;
+			header[8] = timeToLive;
+			header[9] = protocol;
+			
+			header[10] = headerChecksum[0];
+			header[11] = headerChecksum[1];
+			
 			
 			for(int i = 0; i < 4; i++) {
 				header[12+i] = ipDstAddr.addr[i];
