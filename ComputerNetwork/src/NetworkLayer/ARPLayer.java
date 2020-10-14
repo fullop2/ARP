@@ -35,9 +35,9 @@ public class ARPLayer implements BaseLayer {
 			setIp(ip);
 			
 			if(isNIL(ethernet))
-				setTimeToLive(30000);
+				setTimeToLive(180000);
 			else
-				setTimeToLive(60000);
+				setTimeToLive(1200000);
 		}
 		
 		public void setTimeToLive(int milliSecond) {
@@ -214,14 +214,17 @@ public class ARPLayer implements BaseLayer {
 		return true;
 	}
 	
-	private boolean isBroadCast(byte[] ethernetAddr) {
-		return Arrays.equals(BROADCAST_ETHERNET, ethernetAddr);
-	}
-	
 	private boolean isNIL(byte[] ethernetAddr){
 		return Arrays.equals(NIL_ETHERNET, ethernetAddr);
 	}
 	
+	private boolean isGARP(_ARP_HEADER header){
+		return Arrays.equals(header.ipSenderAddr.addr, header.ipTargetAddr.addr) && isNIL(header.enetTargetAddr.addr);
+	}
+	
+	private boolean needProxy(_ARP_HEADER header){
+		return hasIPInProxyTable(header.ipTargetAddr.addr) && isNIL(header.enetTargetAddr.addr);
+	}
 	
 	class ARPTimer extends Thread {
 		
@@ -289,15 +292,14 @@ public class ARPLayer implements BaseLayer {
 		 * 1. ARP 요청이고
 		 * 
 		 * 1) 나에게 온 요청일 경우
-		 * 2) 브로드캐스트이고 목적지가 내 프록시 테이블에 있을 경우 
-		 * 3) GARP라서 Ethernet Target이 0일 경우 
+		 * 2) 프록싱 가능할 경우
+		 * 3) GARP인 경우
 		 * 
 		 * 내 맥을 넣어서 답장
 		 */
 		if(isRequest(receivedHeader.opcode) && 
-			(isNIL(receivedHeader.enetTargetAddr.addr) ||
-			 isMine(receivedHeader.ipTargetAddr.addr) || 
-			 (isBroadCast(receivedHeader.enetTargetAddr.addr) && hasIPInProxyTable(receivedHeader.ipTargetAddr.addr)))) 
+				(isMine(receivedHeader.ipTargetAddr.addr) || needProxy(receivedHeader)|| isGARP(receivedHeader))
+		   )
 		{	
 			receivedHeader.opcode[1] = 0x02; // make reply
 			receivedHeader.enetTargetAddr = arpHeader.enetSenderAddr;
