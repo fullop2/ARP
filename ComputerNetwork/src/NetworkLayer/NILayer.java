@@ -145,12 +145,17 @@ class Receive_Thread implements Runnable {
 		while (!Thread.currentThread().isInterrupted()) {
 			PcapPacketHandler<String> jpacketHandler = new PcapPacketHandler<String>() {
 				public void nextPacket(PcapPacket packet, String user) {
+					if(Thread.currentThread().isInterrupted()) {
+						AdapterObject.close();
+						System.out.println("Interrupted");
+						return;
+					}
 					data = packet.getByteArray(0, packet.size());
 					UpperLayer.Receive(data);
 				}
 			};
 
-			AdapterObject.loop(500000, jpacketHandler, "");
+			AdapterObject.loop(100000, jpacketHandler, "");
 		}
 	}
 }
