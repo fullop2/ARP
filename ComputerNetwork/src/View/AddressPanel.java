@@ -27,9 +27,7 @@ public class AddressPanel extends JPanel {
 	public static JButton btnSettingSrcAddress;
 	
 	public static JLabel lbldstIP;
-	public static JTextField dstIPAddress;
-	public static JButton btnSettingDstAddress;
-	
+	public static JTextField dstIPAddress;	
 	
 	
 	public AddressPanel(int x, int y) {
@@ -79,16 +77,12 @@ public class AddressPanel extends JPanel {
 		add(dstPanel);
 
 		lbldstIP = new JLabel("IP Address");
-		lbldstIP.setBounds(15,25,70,20);
+		lbldstIP.setBounds(15,45,70,20);
 		dstPanel.add(lbldstIP);
 		
 		dstIPAddress = new JTextField();
-		dstIPAddress.setBounds(100,25,280,20);
+		dstIPAddress.setBounds(100,45,280,20);
 		dstPanel.add(dstIPAddress);
-		
-		btnSettingDstAddress = new JButton("Setting");// setting
-		btnSettingDstAddress.setBounds(160,55,80,20);
-		dstPanel.add(btnSettingDstAddress);
 		
 		setCombobox();
 	}

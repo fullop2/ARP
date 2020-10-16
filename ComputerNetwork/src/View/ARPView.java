@@ -2,8 +2,8 @@ package View;
 
 import javax.swing.JFrame;
 
-public class NetworkView extends JFrame {
-	public NetworkView() {
+public class ARPView extends JFrame {
+	public ARPView() {
 		setTitle("Network View");
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
@@ -12,8 +12,7 @@ public class NetworkView extends JFrame {
 		setBounds(250, 250, 1220, 345);
 		add(new ARPCachePanel(0,0));
 		add(new ProxyARPPanel(400, 0));
-		add(new AddressPanel(800,70));
-		add(new GARPPanel(800,00));
+		add(new GARPPanel(800,0));
 		
 		
 		

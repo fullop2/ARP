@@ -125,55 +125,5 @@ public class AddressEventHandlers implements EventHandlers{
 			}
 			
 		});
-		
-		AddressPanel.btnSettingDstAddress.addActionListener(new ActionListener() {
-			
-			byte[] ethNIL = { 0,0,0,0,0,0};
-			public boolean isSetting = true;
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				
-				if(isSetting) {
-					
-					String ipStringAddress = AddressPanel.dstIPAddress.getText();
-					String[] ipSplit = ipStringAddress.split("\\.");
-					
-					byte[] ipAddress = new byte[4];
-					for(int i = 0; i < 4; i++)
-						ipAddress[i] = (byte) (Integer.parseInt(ipSplit[i]) & 0xff);
-				
-	
-					
-					ARPLayer arp = ((ARPLayer)layerManager.GetLayer("ARP"));
-					
-					byte[] ethernetAddress = arp.getEthernet(ipAddress);
-					if(ethernetAddress == null || Arrays.equals(ethNIL, ethernetAddress)) {
-						System.out.println("IP에 대응하는 MAC을 찾지 못했습니다");
-						JOptionPane.showMessageDialog(null, "[ERR] IP에 대응하는 MAC을 찾지 못했습니다");
-						return;
-					}
-					
-					arp.setEthernetTargetAddress(ethernetAddress);
-					arp.setIPTargetAddress(ipAddress);
-					
-					IPLayer ip = ((IPLayer)layerManager.GetLayer("IP"));
-					ip.setIPDstAddr(ipAddress);
-					
-					AddressPanel.btnSettingDstAddress.setText("Reset");
-					AddressPanel.dstIPAddress.setEditable(false);
-					ChatPanel.btnChatSend.setEnabled(true);					
-					
-					isSetting = false;
-				}
-				else {		
-					AddressPanel.btnSettingDstAddress.setText("Setting");
-					AddressPanel.dstIPAddress.setEditable(true);
-					ChatPanel.btnChatSend.setEnabled(false);
-					isSetting = true;
-					
-				}
-			}
-			
-		});
 	}
 }

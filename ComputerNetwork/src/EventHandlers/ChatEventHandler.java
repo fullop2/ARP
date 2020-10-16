@@ -27,29 +27,54 @@ public class ChatEventHandler implements EventHandlers {
 			byte[] ethNIL = {0,0,0,0,0,0};
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
+				/* Setting Msg */
 				String msg = new String(ChatPanel.chattingWrite.getText());
 				byte[] byteMsg = msg.getBytes();
-				ChatPanel.chattingWrite.setText("");
+				ChatPanel.chattingWrite.setText("");	
+				
+				/* Setting Network Options */
+				String btnState = AddressPanel.btnSettingSrcAddress.getText();
+				
+				if(btnState.equals("Setting")){
+					JOptionPane.showMessageDialog(null, "[ERR] 네트워크를 설정해주세요");
+					return;
+				}
+				
+				String ipStringAddress = AddressPanel.dstIPAddress.getText();
+				
+				if(ipStringAddress.length() == 0){
+					JOptionPane.showMessageDialog(null, "[ERR] IP를 입력해주세요");
+					return;
+				}
+					
+				String[] ipSplit = ipStringAddress.split("\\.");
+				
+				byte[] ipAddress = new byte[4];
+				for(int i = 0; i < 4; i++)
+					ipAddress[i] = (byte) (Integer.parseInt(ipSplit[i]) & 0xff);
+				
+				ARPLayer arp = ((ARPLayer)layerManager.GetLayer("ARP"));
+				
+				byte[] ethernetAddress = arp.getEthernet(ipAddress);
+				if(ethernetAddress == null || Arrays.equals(ethNIL, ethernetAddress)) {
+					System.out.println("IP에 대응하는 MAC을 찾지 못했습니다");
+					JOptionPane.showMessageDialog(null, "[ERR] IP에 대응하는 MAC을 찾지 못했습니다");
+					return;
+				}
 				
 				EthernetLayer ethernetLayer = ((EthernetLayer)layerManager.GetLayer("Ethernet"));
-				ethernetLayer.setEthernetType(ipType);	
+				ethernetLayer.setEthernetType(ipType);
 				
-				ARPLayer arpLayer = ((ARPLayer)layerManager.GetLayer("ARP"));
-				IPLayer ipLayer = ((IPLayer)layerManager.GetLayer("IP"));
+				IPLayer ip = ((IPLayer)layerManager.GetLayer("IP"));
+				ip.setIPDstAddr(ipAddress);
 				
-				byte[] ethernetAddr = arpLayer.getEthernet(ipLayer.getIPDstAddr());
-				if(ethernetAddr == null || Arrays.equals(ethNIL,ethernetAddr)) {
-					System.out.println("[ERR] 현재 IP에 매칭되는 MAC이 없습니다 다시 확인하세요");
-					JOptionPane.showMessageDialog(null, "[ERR] 현재 IP에 매칭되는 MAC이 없습니다 다시 확인하세요");
-					AddressPanel.btnSettingDstAddress.getActionListeners()[0].actionPerformed(arg0);
-				}
-				else {
-					ChatPanel.chattingArea.append("[SEND] : "+msg+"\n");
-					TCPLayer tcpLayer =  ((TCPLayer)layerManager.GetLayer("TCP"));
-					tcpLayer.setPort(port);				
-					ChatAppLayer chatAppLayer = ((ChatAppLayer)layerManager.GetLayer("Chat"));
-					chatAppLayer.Send(byteMsg,byteMsg.length);
-				}
+				TCPLayer tcpLayer =  ((TCPLayer)layerManager.GetLayer("TCP"));
+				tcpLayer.setPort(port);	
+				
+				/* Send Msg */
+				ChatPanel.chattingArea.append("[SEND] : "+msg+"\n");			
+				ChatAppLayer chatAppLayer = ((ChatAppLayer)layerManager.GetLayer("Chat"));
+				chatAppLayer.Send(byteMsg,byteMsg.length);
 			}
 		});
 	}

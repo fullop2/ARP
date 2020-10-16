@@ -35,7 +35,6 @@ public class ChatPanel extends JPanel {
 		
 		btnChatSend = new JButton("Send");		
 		btnChatSend.setBounds(315,270,70,20);
-		btnChatSend.setEnabled(false);
 		add(btnChatSend);
 	}
 }
