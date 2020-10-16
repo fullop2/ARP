@@ -228,16 +228,24 @@ public class ARPLayer implements BaseLayer {
 	
 	class ARPTimer extends Thread {
 		
+		private long beforeTime;
+		
+		ARPTimer(){
+			beforeTime = System.currentTimeMillis();
+		}
 		@Override
 		public void run() {
 			while(true) {
 				try {
 					Thread.sleep(1000);
 					
+					long timeElipse = System.currentTimeMillis() - beforeTime;
+					beforeTime =  System.currentTimeMillis();
+					
 					Iterator<ARPCache> iter = arpCacheTable.iterator();
 					while(iter.hasNext()) {
 						ARPCache cache = iter.next();
-						cache.timeToLive -= 1000;
+						cache.timeToLive -= timeElipse;
 						if(cache.timeToLive <= 0) {
 							iter.remove();
 							updateARPCachePanel();
