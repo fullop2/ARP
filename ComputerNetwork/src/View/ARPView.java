@@ -9,13 +9,9 @@ public class ARPView extends JFrame {
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		setLayout(null);
 		
-		setBounds(250, 250, 1220, 345);
+		setBounds(250, 250, 815, 415);
 		add(new ARPCachePanel(0,0));
 		add(new ProxyARPPanel(400, 0));
-		add(new GARPPanel(800,0));
-		
-		
-		
-		
+		add(new GARPPanel(400,300));
 	}
 }

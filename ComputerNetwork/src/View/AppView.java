@@ -15,7 +15,7 @@ public class AppView extends JFrame{
 
 		setTitle("Chatting App");
 
-		setBounds(250, 250, 820, 380);
+		setBounds(250, 250, 820, 350);
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -28,11 +28,8 @@ public class AppView extends JFrame{
 		btnOpenNetwork.setBounds(405, 235, 390, 60);
 		add(btnOpenNetwork);
 		
-		
-		
 		networkView = new ARPView();
-		
-		
+
 		setVisible(visible);
 	}
 }
