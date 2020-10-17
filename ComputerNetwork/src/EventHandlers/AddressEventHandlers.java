@@ -39,19 +39,32 @@ public class AddressEventHandlers implements EventHandlers{
 			public void actionPerformed(ActionEvent e) {
 				
 				if(isSetting) {
-					String macAddress = AddressPanel.srcMacAddress.getText();			
-					byte[] hardwareAddress = new byte[6];
 					
-					for(int i = 0; i < 6; i++)
-						hardwareAddress[i] = (byte) (Integer.parseInt(macAddress.substring(i*2, i*2+2),16) & 0xff);
+					
+					String macAddress = AddressPanel.srcMacAddress.getText();	
+					if(!macValidation(macAddress)) {
+						JOptionPane.showMessageDialog(null, "[ERR] MAC을 제대로 설정해주세요");
+						return;
+					}
 					
 					String ipStringAddress = AddressPanel.srcIPAddress.getText();
-					String[] ipSplit = ipStringAddress.split("\\.");
+					if(!ipValidation(ipStringAddress)) {
+						JOptionPane.showMessageDialog(null, "[ERR] IP를 제대로 설정해주세요");
+						return;
+					}
 					
+					String[] macSplit = macAddress.split("-");					
+					byte[] hardwareAddress = new byte[6];
+					
+					for(int i = 0; i < 6; i++) {
+						hardwareAddress[i] = (byte) (Integer.parseInt(macSplit[i],16) & 0xff);
+					}
+					
+					String[] ipSplit = ipStringAddress.split("\\.");	
 					byte[] ipAddress = new byte[4];
-					for(int i = 0; i < 4; i++)
+					for(int i = 0; i < 4; i++) {
 						ipAddress[i] = (byte) (Integer.parseInt(ipSplit[i]) & 0xff);
-				
+					}
 					int index = AddressPanel.comboBox.getSelectedIndex();
 					
 					NILayer niLayer = ((NILayer)layerManager.GetLayer("NI"));
@@ -94,6 +107,15 @@ public class AddressEventHandlers implements EventHandlers{
 				}
 			}
 			
+			boolean macValidation(String macAddress) {
+				
+				return macAddress.matches("([0-9A-F]{2}[:-]){5}([0-9A-F]{2})");
+			}
+			
+			boolean ipValidation(String ipAddress) {
+				return ipAddress.matches("((2[0-5]|1[0-9]|[0-9])?[0-9]\\.){3}((2[0-5]|1[0-9]|[0-9])?[0-9])");
+			}
+			
 		});
 		
 		/*
@@ -113,62 +135,15 @@ public class AddressEventHandlers implements EventHandlers{
 					byte[] hardwareAddress = ((NILayer)layerManager.GetLayer("NI")).GetAdapterObject(index).getHardwareAddress();	
 					StringBuffer stringBuffer = new StringBuffer();
 					
-					for(int i = 0; i < hardwareAddress.length; i++) {
-						stringBuffer.append(String.format("%02X", (hardwareAddress[i] & 0xff)));
+					for(int i = 0; i < hardwareAddress.length-1; i++) {
+						stringBuffer.append(String.format("%02X-", (hardwareAddress[i] & 0xff)));
 					}
+					stringBuffer.append(String.format("%02X", (hardwareAddress[5] & 0xff)));
 					AddressPanel.srcMacAddress.setText(stringBuffer.toString());
 
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
-				}
-			}
-			
-		});
-		
-		AddressPanel.btnSettingDstAddress.addActionListener(new ActionListener() {
-			
-			byte[] ethNIL = { 0,0,0,0,0,0};
-			boolean isSetting = true;
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				
-				if(isSetting) {
-					
-					String ipStringAddress = AddressPanel.dstIPAddress.getText();
-					String[] ipSplit = ipStringAddress.split("\\.");
-					
-					byte[] ipAddress = new byte[4];
-					for(int i = 0; i < 4; i++)
-						ipAddress[i] = (byte) (Integer.parseInt(ipSplit[i]) & 0xff);
-				
-	
-					
-					ARPLayer arp = ((ARPLayer)layerManager.GetLayer("ARP"));
-					
-					byte[] ethernetAddress = arp.getEthernet(ipAddress);
-					if(ethernetAddress == null || Arrays.equals(ethNIL, ethernetAddress)) {
-						System.out.println("IP에 대응하는 MAC을 찾지 못했습니다");
-						return;
-					}
-					
-					arp.setEthernetTargetAddress(ethernetAddress);
-					arp.setIPTargetAddress(ipAddress);
-					
-					IPLayer ip = ((IPLayer)layerManager.GetLayer("IP"));
-					ip.setIPDstAddr(ipAddress);
-					
-					AddressPanel.btnSettingSrcAddress.setText("Reset");
-					AddressPanel.dstIPAddress.setEditable(false);
-					ChatPanel.btnChatSend.setEnabled(true);					
-					
-					isSetting = false;
-				}
-				else {		
-					AddressPanel.btnSettingSrcAddress.setText("Setting");
-					AddressPanel.dstIPAddress.setEditable(true);
-					ChatPanel.btnChatSend.setEnabled(false);
-					isSetting = true;
 				}
 			}
 			

@@ -139,6 +139,14 @@ public class IPLayer implements BaseLayer {
 			ipHeader.ipSrcAddr.addr[i] = addr[i];
 	}
 	
+	public byte[] getIPSrcAddr() {
+		return ipHeader.ipSrcAddr.addr;
+	}
+	
+	public byte[] getIPDstAddr() {
+		return ipHeader.ipDstAddr.addr;
+	}
+	
 	@Override
 	public boolean Send(byte[] input, int length) {
 		

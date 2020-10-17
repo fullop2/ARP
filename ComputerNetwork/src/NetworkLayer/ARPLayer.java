@@ -7,8 +7,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import View.ARPCachePanel;
-
+import EventHandlers.ARPTableEventHandlers;
 
 public class ARPLayer implements BaseLayer {
 	public int nUpperLayerCount = 0;
@@ -330,11 +329,7 @@ public class ARPLayer implements BaseLayer {
 		String[] stringData = new String[arpCacheTable.size()];
 		for(int i = 0; i < stringData.length; i++)
 			stringData[i] = arpCacheTable.get(i).toString();
-		
-		ARPCachePanel.ArpTable.removeAll();
-		for(String str : stringData) {
-			ARPCachePanel.ArpTable.add(str);
-		}
+		ARPTableEventHandlers.updateARPTable(stringData);
 	}
 	
 	

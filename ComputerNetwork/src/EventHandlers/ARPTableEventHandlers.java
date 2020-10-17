@@ -94,5 +94,10 @@ public class ARPTableEventHandlers implements EventHandlers {
 		});
 	}
 
-
+	public static void updateARPTable(String[] stringData) {
+		ARPCachePanel.ArpTable.removeAll();
+		for(String str : stringData) {
+			ARPCachePanel.ArpTable.add(str);
+		}
+	}
 }
