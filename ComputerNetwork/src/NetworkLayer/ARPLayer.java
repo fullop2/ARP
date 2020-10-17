@@ -310,7 +310,6 @@ public class ARPLayer implements BaseLayer {
 		{	
 			receivedHeader.opcode[1] = 0x02; // make reply
 			receivedHeader.enetTargetAddr = arpHeader.enetSenderAddr;
-			//receivedHeader.ipTargetAddr = arpHeader.ipSenderAddr;
 			
 			// swap sender and target
 			_IP_ADDR ipSender = receivedHeader.ipSenderAddr;
