@@ -16,6 +16,10 @@ public interface BaseLayer {
 
 	public void SetUnderLayer(BaseLayer pUnderLayer);
 
+	public default BaseLayer GetUnderLayer(int index) {
+		return null;
+	}
+	
 	public void SetUpperLayer(BaseLayer pUpperLayer);
 
 	public default void SetUnderUpperLayer(BaseLayer pUULayer) {

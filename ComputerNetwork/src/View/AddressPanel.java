@@ -24,43 +24,65 @@ public class AddressPanel extends JPanel {
 	public static JTextArea srcMacAddress;
 	public static JTextField srcIPAddress;
 	
-	public static JButton btnSetting;
+	public static JButton btnSettingSrcAddress;
+	
+	public static JLabel lbldstIP;
+	public static JTextField dstIPAddress;	
+	
 	
 	public AddressPanel(int x, int y) {
 
-		setBounds(x,y,400,150);
-		setBorder(BorderFactory.createTitledBorder("Address"));
+		setBounds(x,y,400,230);
 		setLayout(null);
+		
+		JPanel srcPanel = new JPanel(null);
+		srcPanel.setBounds(0,0,400,135);
+		srcPanel.setBorder(BorderFactory.createTitledBorder("Src Address"));
+		srcPanel.setLayout(null);
+		add(srcPanel);
+		
 		
 		lblSelectNic = new JLabel("NIC List");
 		lblSelectNic.setBounds(15,15,70,20);
-		add(lblSelectNic);
+		srcPanel.add(lblSelectNic);
 
 		comboBox = new JComboBox();
 		comboBox.setBounds(100,15,280,20);
-		add(comboBox);
+		srcPanel.add(comboBox);
 		
 		lblsrcMAC = new JLabel("Mac Address");
 		lblsrcMAC.setBounds(15,45,70,20);
-		add(lblsrcMAC);
+		srcPanel.add(lblsrcMAC);
 
 		srcMacAddress = new JTextArea();
-		srcMacAddress.setEditable(false);
 		srcMacAddress.setBounds(100,45,280,20);
-		add(srcMacAddress);
+		srcPanel.add(srcMacAddress);
 
 		lblsrcIP = new JLabel("IP Address");
 		lblsrcIP.setBounds(15,75,70,20);
-		add(lblsrcIP);
+		srcPanel.add(lblsrcIP);
 		
 		srcIPAddress = new JTextField();
 		srcIPAddress.setBounds(100,75,280,20);
-		add(srcIPAddress);
+		srcPanel.add(srcIPAddress);
 
 
-		btnSetting = new JButton("Setting");// setting
-		btnSetting.setBounds(160,105,80,20);
-		add(btnSetting);
+		btnSettingSrcAddress = new JButton("Setting");// setting
+		btnSettingSrcAddress.setBounds(160,105,80,20);
+		srcPanel.add(btnSettingSrcAddress);
+		
+		JPanel dstPanel = new JPanel(null);
+		dstPanel.setBounds(0,135,400,95);
+		dstPanel.setBorder(BorderFactory.createTitledBorder("Dst Address"));
+		add(dstPanel);
+
+		lbldstIP = new JLabel("IP Address");
+		lbldstIP.setBounds(15,45,70,20);
+		dstPanel.add(lbldstIP);
+		
+		dstIPAddress = new JTextField();
+		dstIPAddress.setBounds(100,45,280,20);
+		dstPanel.add(dstIPAddress);
 		
 		setCombobox();
 	}
