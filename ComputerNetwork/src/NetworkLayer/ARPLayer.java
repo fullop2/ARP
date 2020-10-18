@@ -420,19 +420,15 @@ public class ARPLayer implements BaseLayer {
 		System.arraycopy(ethe, 0, ethernet, 0, 6);
 		Iterator<ARPCache> iter = arpCacheTable.iterator();
 		
-		byte[] deletedEthernet = null;
 		while(iter.hasNext()) {
 			ARPCache cache = iter.next();
 			if(Arrays.equals(cache.ip.addr,ip)) {
 				printARPInfo("Remove Cache", cache.ip.addr, cache.ethernet.addr);
-				deletedEthernet = new byte[6];
-				System.arraycopy(cache.ethernet.addr, 0, deletedEthernet, 0, 6);
 				iter.remove();
 				break;
 			}
 		}
-		if(isNIL(ethernet) && !isNIL(deletedEthernet))
-			ethernet = deletedEthernet;
+
 		arpCacheTable.add(new ARPCache(ip,ethernet));
 		
 		iter = arpCacheTable.iterator();

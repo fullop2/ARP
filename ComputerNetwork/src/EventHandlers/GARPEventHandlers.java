@@ -45,6 +45,8 @@ public class GARPEventHandlers implements EventHandlers {
 				arpLayer.setEthernetTargetAddress(Address.ETH_NIL);
 				// no info for tcp,ip
 				
+				AddressPanel.srcMacAddress.setText(GARPPanel.GARPMacAddr.getText());
+				
 				// app
 				ARPAppLayer arpAppLayer = ((ARPAppLayer)layerManager.GetLayer("ARPA"));			
 				arpAppLayer.Send(null,0);
