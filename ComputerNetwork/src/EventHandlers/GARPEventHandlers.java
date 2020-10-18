@@ -40,12 +40,9 @@ public class GARPEventHandlers implements EventHandlers {
 					macAddress[i] = (byte) (Integer.parseInt(macSplit[i],16) & 0xff);
 				
 				EthernetLayer ethernetLayer = ((EthernetLayer)layerManager.GetLayer("Ethernet"));
-				byte[] nil = { (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00};
-				byte[] broadcast = { (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff};
-				byte[] ethType = { (byte) 0x08, (byte)0x06 };
 				
-				ethernetLayer.setDstEthernetAddress(broadcast);
-				ethernetLayer.setEthernetType(ethType);
+				ethernetLayer.setDstEthernetAddress(Address.ETH_BROADCAST);
+				ethernetLayer.setEthernetType(Address.ETH_TYPE_ARP);
 				
 				String ip = AddressPanel.srcIPAddress.getText();
 				StringTokenizer ipSplit = new StringTokenizer(ip, ".");
@@ -56,7 +53,7 @@ public class GARPEventHandlers implements EventHandlers {
 				ARPLayer arpLayer = ((ARPLayer)layerManager.GetLayer("ARP"));
 				arpLayer.setIPTargetAddress(ipAddress);
 				arpLayer.setEthernetSenderAddress(macAddress);
-				arpLayer.setEthernetTargetAddress(nil);
+				arpLayer.setEthernetTargetAddress(Address.ETH_NIL);
 				// no info for tcp,ip
 				
 				// app

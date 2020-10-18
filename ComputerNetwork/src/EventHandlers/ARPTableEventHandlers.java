@@ -16,8 +16,6 @@ public class ARPTableEventHandlers implements EventHandlers {
 	public void setEventHandlers(LayerManager layerManager) {
 		ARPCachePanel.btnArpSend.addActionListener(new ActionListener() {
 			
-			byte[] broadcast = { (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF};
-			byte[] NIL = {0,0,0,0,0,0};
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				byte[] ipAddress = Address.ip(ARPCachePanel.ArpIP.getText());
@@ -32,9 +30,8 @@ public class ARPTableEventHandlers implements EventHandlers {
 				
 				EthernetLayer ethernetLayer = ((EthernetLayer)layerManager.GetLayer("Ethernet"));
 				
-				ethernetLayer.setDstEthernetAddress(broadcast);
-				byte[] ethType = { (byte) 0x08, (byte)0x06 };
-				ethernetLayer.setEthernetType(ethType);
+				ethernetLayer.setDstEthernetAddress(Address.ETH_BROADCAST);
+				ethernetLayer.setEthernetType(Address.ETH_TYPE_ARP);
 				
 				/*
 				 * ARP
@@ -44,7 +41,7 @@ public class ARPTableEventHandlers implements EventHandlers {
 			
 				ARPLayer arpLayer = ((ARPLayer)layerManager.GetLayer("ARP"));
 				arpLayer.setIPTargetAddress(ipAddress);
-				arpLayer.setEthernetTargetAddress(NIL);
+				arpLayer.setEthernetTargetAddress(Address.ETH_NIL);
 				// no info for tcp,ip
 				
 				// app

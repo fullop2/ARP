@@ -21,10 +21,6 @@ public class ChatEventHandler implements EventHandlers {
 	public void setEventHandlers(LayerManager layerManager) {
 		ChatPanel.btnChatSend.addActionListener(new ActionListener() {
 			
-			byte[] port = {0x20,0x10};
-			byte[] ipType= {0x08,0x00};
-			
-			byte[] ethNIL = {0,0,0,0,0,0};
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				/* Setting Msg */
@@ -46,20 +42,20 @@ public class ChatEventHandler implements EventHandlers {
 				ARPLayer arp = ((ARPLayer)layerManager.GetLayer("ARP"));
 				
 				byte[] ethernetAddress = arp.getEthernet(ipAddress);
-				if(ethernetAddress == null || Arrays.equals(ethNIL, ethernetAddress)) {
+				if(ethernetAddress == null || Address.isNIL(ethernetAddress)) {
 					System.out.println("IP에 대응하는 MAC을 찾지 못했습니다");
 					JOptionPane.showMessageDialog(null, "[ERR] IP에 대응하는 MAC을 찾지 못했습니다");
 					return;
 				}
 				
 				EthernetLayer ethernetLayer = ((EthernetLayer)layerManager.GetLayer("Ethernet"));
-				ethernetLayer.setEthernetType(ipType);
+				ethernetLayer.setEthernetType(Address.ETH_TYPE_IP);
 				
 				IPLayer ip = ((IPLayer)layerManager.GetLayer("IP"));
 				ip.setIPDstAddr(ipAddress);
 				
 				TCPLayer tcpLayer =  ((TCPLayer)layerManager.GetLayer("TCP"));
-				tcpLayer.setPort(port);	
+				tcpLayer.setPort(Address.APP_PORT_CHAT);	
 				
 				/* Send Msg */
 				ChatPanel.chattingArea.append("[SEND] : "+msg+"\n");			

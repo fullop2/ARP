@@ -1,8 +1,21 @@
 package EventHandlers;
 
+import java.util.Arrays;
+
 import javax.swing.JOptionPane;
 
 public class Address {
+	
+	public static final byte[] ETH_NIL = { (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00};
+	public static final byte[] ETH_BROADCAST = { (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff};
+	public static final byte[] ETH_TYPE_ARP = { (byte) 0x08, (byte)0x06 };
+	public static final byte[] ETH_TYPE_IP = { (byte) 0x08, (byte)0x06 };
+	public static final byte[] APP_PORT_CHAT = { (byte) 0x20, (byte)0x10 };
+	
+	public static boolean isNIL(byte[] eth) {
+		return Arrays.equals(ETH_NIL, eth);
+	}
+	
 	public static byte[] mac(String stringMacAddress) {
 		stringMacAddress.trim();
 		if(!stringMacAddress.matches("([0-9A-F]{2}[:-]){5}([0-9A-F]{2})")) {
@@ -32,4 +45,6 @@ public class Address {
 		}
 		return address;
 	}
+
+	
 }
