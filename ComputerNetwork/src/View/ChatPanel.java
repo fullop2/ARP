@@ -12,6 +12,7 @@ public class ChatPanel extends JPanel {
 	public static JTextField chattingWrite;
 	public static JTextArea chattingArea;
 	public static JButton btnChatSend;
+	public static JTextField nickName;
 	
 	public ChatPanel(int x, int y) {
 		setBounds(x,y,400,300);
@@ -28,8 +29,13 @@ public class ChatPanel extends JPanel {
 		scrollPane.setVisible(true);
 		add(scrollPane);
 		
+		nickName = new JTextField();
+		nickName.setBounds(15,270,60,20);
+		nickName.setText("Guest"+(int)(Math.random()*100));
+		add(nickName);
+		
 		chattingWrite = new JTextField();
-		chattingWrite.setBounds(15,270,295,20);
+		chattingWrite.setBounds(75,270,220,20);
 		add(chattingWrite);
 		chattingWrite.setColumns(10);
 		
