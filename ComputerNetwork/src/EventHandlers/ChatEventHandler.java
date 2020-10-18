@@ -67,7 +67,7 @@ public class ChatEventHandler implements EventHandlers {
 				
 				byte[] myIP = Address.ip(AddressPanel.srcIPAddress.getText());
 				chatAppLayer.setIP(myIP);
-				chatAppLayer.setNickname("A".getBytes());
+				chatAppLayer.setNickname(ChatPanel.nickName.getText().getBytes());
 				chatAppLayer.Send(byteMsg,byteMsg.length);
 			}
 		});
