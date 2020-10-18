@@ -1,5 +1,6 @@
 package EventHandlers;
 
+import java.awt.desktop.SystemSleepEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
@@ -67,16 +68,23 @@ public class ChatEventHandler implements EventHandlers {
 				
 				byte[] myIP = Address.ip(AddressPanel.srcIPAddress.getText());
 				chatAppLayer.setIP(myIP);
-				chatAppLayer.setNickname(ChatPanel.nickName.getText().getBytes());
+				
+				byte[] nickname = ChatPanel.nickName.getText().getBytes();
+				if(nickname.length == 0)
+					nickname = "Anonymous".getBytes();
+				
+				chatAppLayer.setNickname(nickname);
 				chatAppLayer.Send(byteMsg,byteMsg.length);
 			}
 		});
 	}
 
-	public static void printMsg(String msgType, byte[] nickname, byte[] ip, byte[] msg) {
+	public static void printMsg(String msgType,byte nickNameLen, byte[] nickname, byte[] ip, byte[] msg) {
 		StringBuffer str = new StringBuffer();
 		str.append("["+msgType+" ");
-		str.append(new String(nickname).trim()+" ");
+		byte[] nickName = new byte[nickNameLen];
+		System.arraycopy(nickname, 0, nickName, 0, nickNameLen);
+		str.append(new String(nickName).trim()+" ");
 		for(int i = 0; i < 3; i++)
 			str.append(ip[i]+".");
 		str.append(ip[3]+"] : ");

@@ -69,14 +69,14 @@ public class ChatAppLayer implements BaseLayer{
     	byte[] msg = chatHeader.makeHeader();
     	
     	System.out.println("Send Msg");
-    	ChatEventHandler.printMsg("SEND",chatHeader.nickname, chatHeader.ip, chatHeader.msg);
+    	ChatEventHandler.printMsg("SEND",chatHeader.nicknameLen,chatHeader.nickname, chatHeader.ip, chatHeader.msg);
 		return p_UnderLayer.Send(msg, msg.length);
 	}
 
            
 	public boolean Receive(byte[] input){
 		_CAPP_HEADER receiveHeader = new _CAPP_HEADER(input);
-		ChatEventHandler.printMsg("RECV", receiveHeader.nickname, receiveHeader.ip, receiveHeader.msg);
+		ChatEventHandler.printMsg("RECV",receiveHeader.nicknameLen, receiveHeader.nickname, receiveHeader.ip, receiveHeader.msg);
 		return true;
 	}	 
 
