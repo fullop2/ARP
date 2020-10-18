@@ -24,15 +24,10 @@ public class Address {
 			return null;
 		}
 		
-<<<<<<< HEAD
-		String[] ipSplit = stringIpAddress.split("-");
-		byte[] address = new byte[6];
-		for(int i = 0; i < 6; i++) {
-=======
+
 		String[] ipSplit = stringIpAddress.split("\\.");
 		byte[] address = new byte[6];
 		for(int i = 0; i < 4; i++) {
->>>>>>> 58eaf1034b170dd5d2f8f56ce595f600304d0a2c
 			address[i] = (byte) (Integer.parseInt(ipSplit[i]) & 0xff);
 		}
 		return address;
