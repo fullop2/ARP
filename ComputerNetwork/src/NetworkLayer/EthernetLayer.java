@@ -124,7 +124,6 @@ public class EthernetLayer implements BaseLayer {
 			System.arraycopy(input, 14, data, 0, input.length-14);
 			if(isARP(receiveHeader.type)) {
 				setEthernetType(receiveHeader.type);
-				setDstEthernetAddress(receiveHeader.enetSrcAddr.addr);
 				p_aUpperLayer.get(1).Receive(data);
 			}
 			else if(isIP(receiveHeader.type)) {
