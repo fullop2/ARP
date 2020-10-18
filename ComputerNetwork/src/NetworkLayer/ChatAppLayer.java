@@ -3,6 +3,7 @@ package NetworkLayer;
 import java.util.ArrayList;
 
 import Application.ApplicationController;
+import EventHandlers.ChatEventHandler;
 
 public class ChatAppLayer implements BaseLayer{
 	public int nUpperLayerCount = 0;
@@ -56,7 +57,7 @@ public class ChatAppLayer implements BaseLayer{
            
 	public boolean Receive(byte[] input){
 		
-		ApplicationController.receiveMsg(new String(input));
+		ChatEventHandler.receiveMsg(new String(input));
 		return true;
 	}	 
 

@@ -70,4 +70,8 @@ public class ChatEventHandler implements EventHandlers {
 		});
 	}
 
+	public static void receiveMsg(String msg) {
+		ChatPanel.chattingArea.append("[RECV] : " + msg + "\n");
+	}
+
 }
