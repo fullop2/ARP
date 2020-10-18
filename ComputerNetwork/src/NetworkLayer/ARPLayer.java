@@ -23,6 +23,7 @@ public class ARPLayer implements BaseLayer {
 	
 	private final byte[] NIL_ETHERNET = new byte[6];
 	private final byte[] BROADCAST_ETHERNET = new byte[6];
+	private final byte[] HW_TYPE_ETH = {0x00, 0x01};
 	
 	public class ARPCache{
 		_IP_ADDR ip = new _IP_ADDR();
@@ -208,10 +209,7 @@ public class ARPLayer implements BaseLayer {
 	}
 	
 	private boolean isMine(byte[] ipAddr) {
-		for(int i = 0; i < 4; i++)
-			if(ipAddr[i] != arpHeader.ipSenderAddr.addr[i])
-				return false;
-		return true;
+		return Arrays.equals(arpHeader.ipSenderAddr.addr, ipAddr);
 	}
 	
 	private boolean isNIL(byte[] ethernetAddr){
@@ -276,6 +274,8 @@ public class ARPLayer implements BaseLayer {
 	@Override
 	public synchronized boolean Receive(byte[] input) {
 		
+		System.out.println("Receive ARP");
+		
 		_ARP_HEADER receivedHeader = new _ARP_HEADER(input);
 		
 		if(isMine(receivedHeader.ipSenderAddr.addr)) {// 메세지 전송자가 나인 경우 아무것도 하지 않음
@@ -283,6 +283,7 @@ public class ARPLayer implements BaseLayer {
 		}
 		
 		// 내가 보낸 ARP가 아니라면 ARP Table에 추가
+		
 		byte[] ip = new byte[4];
 		System.arraycopy(receivedHeader.ipSenderAddr.addr, 0, ip, 0, 4);		
 		byte[] eth = new byte[6];
@@ -292,9 +293,12 @@ public class ARPLayer implements BaseLayer {
 			System.out.print(String.format("%02X ", b & 0xff));
 		System.out.println();
 		
+		for(byte b : ip)
+			System.out.print(String.format("%3d.", (int)(b & 0xff)));
+		System.out.println();
 		addARPCache(ip,eth);
 		
-		System.out.println("Receive ARP");
+
 		
 		/*
 		 * 1. ARP 요청이고
@@ -311,7 +315,17 @@ public class ARPLayer implements BaseLayer {
 		{	
 			receivedHeader.opcode[1] = 0x02; // make reply
 			receivedHeader.enetTargetAddr = arpHeader.enetSenderAddr;
-			// receivedHeader.ipTargetAddr = Already Set.
+			/*
+			 * 일반 ARP 요청은 목적지가 수신한 ARP 메세지에 존재하므로 건드리지 않아도 됨
+			 * 하지만 GARP의 경우 Target과 Sender가 동일함. 따라서 현재 자신의 IP 정보를 넣어서 답장을 해줘야 한다
+			 */
+			if(Arrays.equals(receivedHeader.ipTargetAddr.addr,receivedHeader.ipSenderAddr.addr)) {
+				System.out.println("Receive GARP Request");
+				receivedHeader.ipTargetAddr = arpHeader.ipSenderAddr;
+			}
+			else {
+				System.out.println("Receive ARP Request");
+			}
 			
 			// swap sender and target
 			_IP_ADDR ipSender = receivedHeader.ipSenderAddr;
@@ -322,6 +336,12 @@ public class ARPLayer implements BaseLayer {
 			
 			receivedHeader.ipTargetAddr = ipSender;
 			receivedHeader.enetTargetAddr = ethSender;
+			
+			/* HW Type을 ARP 프로토콜 정보에서 알 수 있다 
+			 * 따라서 ARP Layer에서 하위 레이어의 정보에 접근 가능 
+			 */
+			if(Arrays.equals(HW_TYPE_ETH,receivedHeader.hardwareType))  
+				((EthernetLayer)p_UnderLayer).setDstEthernetAddress(receivedHeader.enetTargetAddr.addr);
 			
 			byte[] header = receivedHeader.makeHeader();
 			p_UnderLayer.Send(header,header.length);	
