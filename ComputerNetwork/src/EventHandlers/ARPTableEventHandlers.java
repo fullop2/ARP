@@ -20,14 +20,9 @@ public class ARPTableEventHandlers implements EventHandlers {
 			byte[] NIL = {0,0,0,0,0,0};
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				String ip = ARPCachePanel.ArpIP.getText();
-				// ip 앞 뒤 공백 제거 
-				ip = ip.trim();
-				StringTokenizer ipSplit = new StringTokenizer(ip, ".");
-				byte[] ipAddress = new byte[4];
-				for (int i = 0; i < 4; i++) {
-					ipAddress[i] = (byte)Integer.parseInt(Integer.toHexString(Integer.parseInt(ipSplit.nextToken())),16);
-				}
+				byte[] ipAddress = Address.ip(ARPCachePanel.ArpIP.getText());
+				
+				if(ipAddress == null) return;
 				
 				/*
 				 * 이더넷
@@ -63,12 +58,8 @@ public class ARPTableEventHandlers implements EventHandlers {
 			public void actionPerformed(ActionEvent arg0) {
 				String data = ARPCachePanel.ArpTable.getSelectedItem();
 				if(data == null) return;
-				String ip = data.split(" ")[0];
-				StringTokenizer ipSplit = new StringTokenizer(ip, ".");
-				byte[] ipAddress = new byte[4];
-				for (int i = 0; i < 4; i++) {
-					ipAddress[i] = (byte)Integer.parseInt(Integer.toHexString(Integer.parseInt(ipSplit.nextToken())),16);
-				}
+				
+				byte[] ipAddress = Address.ip(data.split(" ")[0]);
 				
 				ARPLayer arpLayer = ((ARPLayer)layerManager.GetLayer("ARP"));
 				arpLayer.deleteARPCache(ipAddress);
@@ -82,12 +73,8 @@ public class ARPTableEventHandlers implements EventHandlers {
 				if(data.length == 0) return;
 				
 				for(String cache : data) {
-					String ip = cache.split(" ")[0];
-					StringTokenizer ipSplit = new StringTokenizer(ip, ".");
-					byte[] ipAddress = new byte[4];
-					for (int i = 0; i < 4; i++) {
-						ipAddress[i] = (byte)Integer.parseInt(Integer.toHexString(Integer.parseInt(ipSplit.nextToken())),16);
-					}
+					
+					byte[] ipAddress = Address.ip(cache.split(" ")[0]);
 					
 					ARPLayer arpLayer = ((ARPLayer)layerManager.GetLayer("ARP"));
 					arpLayer.deleteARPCache(ipAddress);
