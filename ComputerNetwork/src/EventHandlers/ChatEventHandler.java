@@ -25,6 +25,7 @@ public class ChatEventHandler implements EventHandlers {
 			public void actionPerformed(ActionEvent arg0) {
 				/* Setting Msg */
 				String msg = new String(ChatPanel.chattingWrite.getText());
+				if(msg.length() == 0) return;
 				byte[] byteMsg = msg.getBytes();
 				ChatPanel.chattingWrite.setText("");	
 				
@@ -38,10 +39,14 @@ public class ChatEventHandler implements EventHandlers {
 				
 				byte[] ipAddress = Address.ip(AddressPanel.dstIPAddress.getText());
 				if(ipAddress == null) return;
-				
+				for(byte b : ipAddress)
+					System.out.print((int)(b & 0x000000ff)+".");
+				System.out.println();
 				ARPLayer arp = ((ARPLayer)layerManager.GetLayer("ARP"));
 				
 				byte[] ethernetAddress = arp.getEthernet(ipAddress);
+				
+				
 				if(ethernetAddress == null || Address.isNIL(ethernetAddress)) {
 					System.out.println("IP에 대응하는 MAC을 찾지 못했습니다");
 					JOptionPane.showMessageDialog(null, "[ERR] IP에 대응하는 MAC을 찾지 못했습니다");

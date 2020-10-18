@@ -69,7 +69,7 @@ public class ARPLayer implements BaseLayer {
 				for(int i = 0; i < 5; i++) {
 					stringBuffer.append(String.format("%02X-", (ethernet.addr[i] & 0xff)).toUpperCase());
 				}
-				stringBuffer.append(String.format("%02X-", (ethernet.addr[5] & 0xff)).toUpperCase());
+				stringBuffer.append(String.format("%02X", (ethernet.addr[5] & 0xff)).toUpperCase());
 				stringBuffer.append(" completed\n");
 			}
 			
@@ -267,6 +267,9 @@ public class ARPLayer implements BaseLayer {
 		p_UnderLayer.Send(header,header.length);
 		
 		System.out.println("Send ARP request");
+		printARPInfo("Sender", arpHeader.ipSenderAddr.addr, arpHeader.enetSenderAddr.addr);
+		printARPInfo("Target", arpHeader.ipTargetAddr.addr, arpHeader.enetTargetAddr.addr);
+		System.out.println();
 		return false;
 	}
 
@@ -274,7 +277,7 @@ public class ARPLayer implements BaseLayer {
 	@Override
 	public synchronized boolean Receive(byte[] input) {
 		
-		System.out.println("Receive ARP");
+		
 		
 		_ARP_HEADER receivedHeader = new _ARP_HEADER(input);
 		
@@ -289,16 +292,12 @@ public class ARPLayer implements BaseLayer {
 		byte[] eth = new byte[6];
 		System.arraycopy(receivedHeader.enetSenderAddr.addr, 0, eth, 0, 6);
 		
-		for(byte b : eth)
-			System.out.print(String.format("%02X ", b & 0xff));
-		System.out.println();
 		
-		for(byte b : ip)
-			System.out.print(String.format("%3d.", (int)(b & 0xff)));
-		System.out.println();
 		addARPCache(ip,eth);
 		
-
+		System.out.println("Receive ARP Request");
+		printARPInfo("Sender", receivedHeader.ipSenderAddr.addr, receivedHeader.enetSenderAddr.addr);
+		printARPInfo("Target", receivedHeader.ipTargetAddr.addr, receivedHeader.enetTargetAddr.addr);
 		
 		/*
 		 * 1. ARP 요청이고
@@ -313,6 +312,8 @@ public class ARPLayer implements BaseLayer {
 				(isMine(receivedHeader.ipTargetAddr.addr) || needProxy(receivedHeader)|| isGARP(receivedHeader))
 		   )
 		{	
+			
+			
 			receivedHeader.opcode[1] = 0x02; // make reply
 			receivedHeader.enetTargetAddr = arpHeader.enetSenderAddr;
 			/*
@@ -320,13 +321,13 @@ public class ARPLayer implements BaseLayer {
 			 * 하지만 GARP의 경우 Target과 Sender가 동일함. 따라서 현재 자신의 IP 정보를 넣어서 답장을 해줘야 한다
 			 */
 			if(Arrays.equals(receivedHeader.ipTargetAddr.addr,receivedHeader.ipSenderAddr.addr)) {
-				System.out.println("Receive GARP Request");
+				System.out.println("[ TYPE : GARP Request]\n");
 				receivedHeader.ipTargetAddr = arpHeader.ipSenderAddr;
 			}
 			else {
-				System.out.println("Receive ARP Request");
+				System.out.println("[ TYPE : ARP Request]\n");
 			}
-			
+
 			// swap sender and target
 			_IP_ADDR ipSender = receivedHeader.ipSenderAddr;
 			_ETHERNET_ADDR ethSender = receivedHeader.enetSenderAddr;
@@ -346,13 +347,23 @@ public class ARPLayer implements BaseLayer {
 			byte[] header = receivedHeader.makeHeader();
 			p_UnderLayer.Send(header,header.length);	
 			
-
-			System.out.println("Send ARP reply");
+			System.out.println("Send ARP Reply");
 		}
 		
 		return true;
 	}
 	
+	private void printARPInfo(String who, byte[] ip, byte[] eth) {
+		System.out.print(who + " : [ ETH : ");
+		for(int i = 0; i < 5; i++)
+			System.out.print(String.format("%02X ", eth[i] & 0xff));
+		System.out.print(String.format("%02X", eth[5] & 0xff));
+		System.out.print(", IP : ");
+		for(int i = 0; i < 3; i++)
+			System.out.print(String.format("%d.", (int)(ip[i] & 0xff)));
+		System.out.print(String.format("%d", (int)(ip[3] & 0xff)));
+		System.out.println("]");
+	}
 	/*
 	 * View Update
 	 */
