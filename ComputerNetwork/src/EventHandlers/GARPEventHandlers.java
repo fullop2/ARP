@@ -4,6 +4,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.StringTokenizer;
 
+import javax.swing.JOptionPane;
+
 import NetworkLayer.ARPAppLayer;
 import NetworkLayer.ARPLayer;
 import NetworkLayer.EthernetLayer;
@@ -25,10 +27,17 @@ public class GARPEventHandlers implements EventHandlers {
 				 * 목적지 브로드캐스팅
 				 * 타입 ARP로 설정
 				 */
-				String mac = GARPPanel.GARPMacAddr.getText();
+				
+				String mac = GARPPanel.GARPMacAddr.getText();	
+				if(!macValidation(mac)) {
+					JOptionPane.showMessageDialog(null, "[ERR] MAC을 제대로 설정해주세요");
+					return;
+				}
+				
+				String[] macSplit = mac.split("-");
 				byte[] macAddress = new byte[6];				
 				for(int i = 0; i < 6; i++)
-					macAddress[i] = (byte) (Integer.parseInt(mac.substring(i*2, i*2+2),16) & 0xff);
+					macAddress[i] = (byte) (Integer.parseInt(macSplit[i],16) & 0xff);
 				
 				EthernetLayer ethernetLayer = ((EthernetLayer)layerManager.GetLayer("Ethernet"));
 				byte[] nil = { (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00};
@@ -38,12 +47,6 @@ public class GARPEventHandlers implements EventHandlers {
 				ethernetLayer.setDstEthernetAddress(broadcast);
 				ethernetLayer.setEthernetType(ethType);
 				
-				/*
-				 * ARP
-				 * 요청할 ip를 ARP Table에 추가
-				 * 타겟으로 해당 ip 설정
-				 */
-				
 				String ip = AddressPanel.srcIPAddress.getText();
 				StringTokenizer ipSplit = new StringTokenizer(ip, ".");
 				byte[] ipAddress = new byte[4];
@@ -52,12 +55,18 @@ public class GARPEventHandlers implements EventHandlers {
 				
 				ARPLayer arpLayer = ((ARPLayer)layerManager.GetLayer("ARP"));
 				arpLayer.setIPTargetAddress(ipAddress);
+				arpLayer.setEthernetSenderAddress(macAddress);
 				arpLayer.setEthernetTargetAddress(nil);
 				// no info for tcp,ip
 				
 				// app
 				ARPAppLayer arpAppLayer = ((ARPAppLayer)layerManager.GetLayer("ARPA"));			
 				arpAppLayer.Send(null,0);
+			}
+			
+			boolean macValidation(String macAddress) {
+				
+				return macAddress.matches("([0-9A-F]{2}[:-]){5}([0-9A-F]{2})");
 			}
 		});
 	}
