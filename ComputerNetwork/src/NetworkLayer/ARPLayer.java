@@ -66,9 +66,10 @@ public class ARPLayer implements BaseLayer {
 				stringBuffer.append("???????????? incompleted\n");
 			}
 			else {
-				for(int i = 0; i < 6; i++) {
-					stringBuffer.append(String.format("%02X", (ethernet.addr[i] & 0xff)).toUpperCase());
+				for(int i = 0; i < 5; i++) {
+					stringBuffer.append(String.format("%02X-", (ethernet.addr[i] & 0xff)).toUpperCase());
 				}
+				stringBuffer.append(String.format("%02X-", (ethernet.addr[5] & 0xff)).toUpperCase());
 				stringBuffer.append(" completed\n");
 			}
 			
