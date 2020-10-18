@@ -24,7 +24,7 @@ public class Address {
 			return null;
 		}
 		
-		String[] ipSplit = stringIpAddress.split("-");
+		String[] ipSplit = stringIpAddress.split("\\.");
 		byte[] address = new byte[6];
 		for(int i = 0; i < 6; i++) {
 			address[i] = (byte) (Integer.parseInt(ipSplit[i]) & 0xff);
