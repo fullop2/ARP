@@ -20,7 +20,8 @@ public class Address {
 	public static byte[] ip(String stringIpAddress) {
 		stringIpAddress.trim();
 		if(!stringIpAddress.matches("((2[0-5]|1[0-9]|[0-9])?[0-9]\\.){3}((2[0-5]|1[0-9]|[0-9])?[0-9])")) {
-			JOptionPane.showMessageDialog(null, "[ERR] MAC을 제대로 설정해주세요");
+			JOptionPane.showMessageDialog(null, "[ERR] IP를 제대로 설정해주세요");
+			return null;
 		}
 		
 		String[] ipSplit = stringIpAddress.split("-");

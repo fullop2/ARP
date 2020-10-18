@@ -39,42 +39,22 @@ public class AddressEventHandlers implements EventHandlers{
 			public void actionPerformed(ActionEvent e) {
 				
 				if(isSetting) {
+									
+					byte[] macAddress = Address.mac(AddressPanel.srcMacAddress.getText());
+					if(macAddress == null) return;
+					byte[] ipAddress = Address.ip(AddressPanel.srcIPAddress.getText());
+					if(ipAddress == null) return;
 					
-					
-					String macAddress = AddressPanel.srcMacAddress.getText();	
-					if(!macValidation(macAddress)) {
-						JOptionPane.showMessageDialog(null, "[ERR] MAC을 제대로 설정해주세요");
-						return;
-					}
-					
-					String ipStringAddress = AddressPanel.srcIPAddress.getText();
-					if(!ipValidation(ipStringAddress)) {
-						JOptionPane.showMessageDialog(null, "[ERR] IP를 제대로 설정해주세요");
-						return;
-					}
-					
-					String[] macSplit = macAddress.split("-");					
-					byte[] hardwareAddress = new byte[6];
-					
-					for(int i = 0; i < 6; i++) {
-						hardwareAddress[i] = (byte) (Integer.parseInt(macSplit[i],16) & 0xff);
-					}
-					
-					String[] ipSplit = ipStringAddress.split("\\.");	
-					byte[] ipAddress = new byte[4];
-					for(int i = 0; i < 4; i++) {
-						ipAddress[i] = (byte) (Integer.parseInt(ipSplit[i]) & 0xff);
-					}
 					int index = AddressPanel.comboBox.getSelectedIndex();
 					
 					NILayer niLayer = ((NILayer)layerManager.GetLayer("NI"));
 					niLayer.SetAdapterNumber(index);
 					
 					EthernetLayer ethernet = ((EthernetLayer)layerManager.GetLayer("Ethernet"));
-					ethernet.setSrcEthernetAddress(hardwareAddress);
+					ethernet.setSrcEthernetAddress(macAddress);
 					
 					ARPLayer arp = ((ARPLayer)layerManager.GetLayer("ARP"));
-					arp.setEthernetSenderAddress(hardwareAddress);
+					arp.setEthernetSenderAddress(macAddress);
 					arp.setIPSenderAddress(ipAddress);
 					
 					IPLayer ip = ((IPLayer)layerManager.GetLayer("IP"));
@@ -105,17 +85,7 @@ public class AddressEventHandlers implements EventHandlers{
 					
 					isSetting = true;
 				}
-			}
-			
-			boolean macValidation(String macAddress) {
-				
-				return macAddress.matches("([0-9A-F]{2}[:-]){5}([0-9A-F]{2})");
-			}
-			
-			boolean ipValidation(String ipAddress) {
-				return ipAddress.matches("((2[0-5]|1[0-9]|[0-9])?[0-9]\\.){3}((2[0-5]|1[0-9]|[0-9])?[0-9])");
-			}
-			
+			}			
 		});
 		
 		/*
