@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import NetworkLayer.ARPLayer;
 import NetworkLayer.LayerManager;
+import NetworkLayer.TestEthernetLayer;
 import NetworkLayer.TestLayer;
 import View.AppView;
 
@@ -35,7 +36,7 @@ class ARPLayerTest {
 		
 		layerManager.AddLayer(new TestLayer("upper"));
 		layerManager.AddLayer(new ARPLayer("test"));
-		layerManager.AddLayer(new TestLayer("under"));
+		layerManager.AddLayer(new TestEthernetLayer("under"));
 		
 		layerManager.ConnectLayers("under ( *test ( *upper ) ) ");
 		
@@ -82,7 +83,7 @@ class ARPLayerTest {
 		layer.Send(null,0);
 		
 		
-		byte[] data = ((TestLayer)layerManager.GetLayer("under")).getSendMessage();	
+		byte[] data = ((TestEthernetLayer)layerManager.GetLayer("under")).getSendMessage();	
 		assertArrayEquals(header,data);
 		
 	}
@@ -119,7 +120,7 @@ class ARPLayerTest {
 		layer.Send(null,0);
 		
 		
-		byte[] data = ((TestLayer)layerManager.GetLayer("under")).getSendMessage();	
+		byte[] data = ((TestEthernetLayer)layerManager.GetLayer("under")).getSendMessage();	
 		assertArrayEquals(header,data);
 		
 	}
@@ -139,7 +140,7 @@ class ARPLayerTest {
 		byte[] eth = layer.getEthernet(ip1);	
 		assertArrayEquals(eth1,eth);	
 		
-		byte[] sendData = ((TestLayer)layerManager.GetLayer("under")).getSendMessage();	
+		byte[] sendData = ((TestEthernetLayer)layerManager.GetLayer("under")).getSendMessage();	
 		
 		byte[] replyHeader = makeHeader(ip2, ip1, eth2, eth1, (byte)0x02); 
 		
@@ -158,7 +159,7 @@ class ARPLayerTest {
 		byte[] header = makeHeader(ip1, ip2, eth1, ethNull, (byte)0x1);
 		layer.Send(null,0);
 		
-		byte[] sendData = ((TestLayer)layerManager.GetLayer("under")).getSendMessage();	
+		byte[] sendData = ((TestEthernetLayer)layerManager.GetLayer("under")).getSendMessage();	
 		assertArrayEquals(header,sendData);
 		
 		header = makeHeader(ip2, ip1, eth2, eth1, (byte)0x2); // reply
@@ -187,7 +188,7 @@ class ARPLayerTest {
 		
 		header = makeHeader(ip1, ip2, eth1, eth2, (byte)0x2); // reply
 		
-		TestLayer under = ((TestLayer)layerManager.GetLayer("under"));	
+		TestEthernetLayer under = ((TestEthernetLayer)layerManager.GetLayer("under"));	
 		byte[] sendData = under.getSendMessage();
 		
 		assertArrayEquals(header, sendData); // reply is valid
