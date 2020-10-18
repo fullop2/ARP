@@ -27,46 +27,26 @@ public class GARPEventHandlers implements EventHandlers {
 				 * 목적지 브로드캐스팅
 				 * 타입 ARP로 설정
 				 */
-				
-				String mac = GARPPanel.GARPMacAddr.getText();	
-				if(!macValidation(mac)) {
-					JOptionPane.showMessageDialog(null, "[ERR] MAC을 제대로 설정해주세요");
-					return;
-				}
-				
-				String[] macSplit = mac.split("-");
-				byte[] macAddress = new byte[6];				
-				for(int i = 0; i < 6; i++)
-					macAddress[i] = (byte) (Integer.parseInt(macSplit[i],16) & 0xff);
+				byte[] macAddress = Address.mac(GARPPanel.GARPMacAddr.getText());
+				if(macAddress == null) return;
 				
 				EthernetLayer ethernetLayer = ((EthernetLayer)layerManager.GetLayer("Ethernet"));
-				byte[] nil = { (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00};
-				byte[] broadcast = { (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff};
-				byte[] ethType = { (byte) 0x08, (byte)0x06 };
 				
-				ethernetLayer.setDstEthernetAddress(broadcast);
-				ethernetLayer.setEthernetType(ethType);
+				ethernetLayer.setDstEthernetAddress(Address.ETH_BROADCAST);
+				ethernetLayer.setEthernetType(Address.ETH_TYPE_ARP);
 				
-				String ip = AddressPanel.srcIPAddress.getText();
-				StringTokenizer ipSplit = new StringTokenizer(ip, ".");
-				byte[] ipAddress = new byte[4];
-				for (int i = 0; i < 4; i++)
-					ipAddress[i] = (byte)Integer.parseInt(ipSplit.nextToken());
+				byte[] ipAddress = Address.ip( AddressPanel.srcIPAddress.getText());
+				if(ipAddress == null) return;
 				
 				ARPLayer arpLayer = ((ARPLayer)layerManager.GetLayer("ARP"));
 				arpLayer.setIPTargetAddress(ipAddress);
 				arpLayer.setEthernetSenderAddress(macAddress);
-				arpLayer.setEthernetTargetAddress(nil);
+				arpLayer.setEthernetTargetAddress(Address.ETH_NIL);
 				// no info for tcp,ip
 				
 				// app
 				ARPAppLayer arpAppLayer = ((ARPAppLayer)layerManager.GetLayer("ARPA"));			
 				arpAppLayer.Send(null,0);
-			}
-			
-			boolean macValidation(String macAddress) {
-				
-				return macAddress.matches("([0-9A-F]{2}[:-]){5}([0-9A-F]{2})");
 			}
 		});
 	}
