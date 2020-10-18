@@ -64,12 +64,24 @@ public class ChatEventHandler implements EventHandlers {
 				
 				/* Send Msg */		
 				ChatAppLayer chatAppLayer = ((ChatAppLayer)layerManager.GetLayer("Chat"));
+				
+				byte[] myIP = Address.ip(AddressPanel.srcIPAddress.getText());
+				chatAppLayer.setIP(myIP);
+				chatAppLayer.setNickname("A".getBytes());
 				chatAppLayer.Send(byteMsg,byteMsg.length);
 			}
 		});
 	}
 
-	public static void printMsg(String msg) {
-		ChatPanel.chattingArea.append(msg);
+	public static void printMsg(String msgType, byte[] nickname, byte[] ip, byte[] msg) {
+		StringBuffer str = new StringBuffer();
+		str.append("["+msgType+" ");
+		str.append(new String(nickname).trim()+" ");
+		for(int i = 0; i < 3; i++)
+			str.append(ip[i]+".");
+		str.append(ip[3]+"] : ");
+		str.append(new String(msg)+"\n");
+		
+		ChatPanel.chattingArea.append(str.toString());
 	}
 }

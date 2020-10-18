@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import Application.ApplicationController;
 import EventHandlers.ChatEventHandler;
+import View.ChatPanel;
 
 public class ChatAppLayer implements BaseLayer{
 	public int nUpperLayerCount = 0;
@@ -12,55 +13,89 @@ public class ChatAppLayer implements BaseLayer{
 	public ArrayList<BaseLayer> p_aUpperLayer = new ArrayList<BaseLayer>();
 	
 	private class _CAPP_HEADER{
-		byte[] capp_totlen;
-		byte capp_type;
-		byte capp_unused;
-		byte[] capp_data;
+		byte[] ip;			// 0-3
+		byte nicknameLen;	// 4
+		byte[] nickname;	// 5-14
+		byte[] msgLen;		// 15-16
+		byte[] msg;			// 17-
 		
 		public _CAPP_HEADER(){
-			this.capp_totlen = new byte[2];
-			this.capp_type = 0x00;
-			this.capp_unused = 0x00;
-			this.capp_data = null;
+			ip = new byte[4];
+			nickname = new byte[10];
+			msgLen = new byte[2];
+		}
+		
+		public _CAPP_HEADER(byte[] header) {
+			this();
+			int msgLength = (int)(header[15] << 8) + (int)(header[16]);
+			
+			System.arraycopy(header, 0, ip, 0, 4);
+			nicknameLen = header[4];
+			System.arraycopy(header, 5, nickname, 0, nicknameLen);
+			msgLen[0] = header[15];
+			msgLen[1] = header[16];
+			msg = new byte[msgLength];
+			System.arraycopy(header, 17, msg, 0, msgLength);
+			
+		}
+		
+		byte[] makeHeader() {
+			int msgLength = (int)((msgLen[0] << 8) | (msgLen[1]));
+			System.out.println(msgLength);
+			
+			byte[] header = new byte[17+msgLength];
+			System.arraycopy(ip, 0, header, 0, 4);
+			header[4] = nicknameLen;
+			System.arraycopy(nickname, 0, header, 5, 10);
+			header[15] = msgLen[0];
+			header[16] = msgLen[1];
+			System.arraycopy(msg, 0, header, 17, msgLength);
+			return header;
 		}
 	}
 	
-	_CAPP_HEADER m_sHeader = new _CAPP_HEADER();
+	_CAPP_HEADER chatHeader = new _CAPP_HEADER();
 	
 	public ChatAppLayer(String pName) {
 		//super(pName);
 		// TODO Auto-generated constructor stub
 		pLayerName = pName;
-		ResetHeader();
-	}
-	
-	public void ResetHeader(){
-		for(int i=0; i<2; i++){
-			m_sHeader.capp_totlen[i] = (byte) 0x00;
-		}
-		m_sHeader.capp_type = (byte) 0x00;	
-		m_sHeader.capp_unused = (byte) 0x00;	
-		m_sHeader.capp_data = null;	
-	}
-	
-	public byte[] ObjToByte(_CAPP_HEADER Header, byte[] input, int length){
-	
-		return null;		
 	}
 	
 	public boolean Send(byte[] input, int length) {     	 
     	if(length == 0) return false;
+    	
+    	setMsg(input);
+    	byte[] msg = chatHeader.makeHeader();
+    	
     	System.out.println("Send Msg");
-		return p_UnderLayer.Send(input,length);
+    	ChatEventHandler.printMsg("SEND",chatHeader.nickname, chatHeader.ip, chatHeader.msg);
+		return p_UnderLayer.Send(msg, msg.length);
 	}
 
            
 	public boolean Receive(byte[] input){
-		
-		ChatEventHandler.printMsg(new String(input));
+		_CAPP_HEADER receiveHeader = new _CAPP_HEADER(input);
+		ChatEventHandler.printMsg("RECV", receiveHeader.nickname, receiveHeader.ip, receiveHeader.msg);
 		return true;
 	}	 
 
+	public void setIP(byte[] ip) {
+		System.arraycopy(ip, 0, chatHeader.ip, 0, 4);
+	}
+	
+	public void setNickname(byte[] nickname) {
+		chatHeader.nicknameLen = (byte) nickname.length;
+		System.arraycopy(nickname, 0, chatHeader.nickname, 0, chatHeader.nicknameLen);
+	}
+	
+	private void setMsg(byte[] msg) {
+		chatHeader.msgLen[0] = (byte) ((msg.length >> 8) & 0xff);
+		chatHeader.msgLen[1] = (byte) (msg.length & 0xff);
+		chatHeader.msg = msg;
+	}
+	
+	
 	@Override
 	public void SetUnderLayer(BaseLayer pUnderLayer) {
 		// TODO Auto-generated method stub
