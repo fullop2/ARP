@@ -40,18 +40,8 @@ public class ChatEventHandler implements EventHandlers {
 					return;
 				}
 				
-				String ipStringAddress = AddressPanel.dstIPAddress.getText();
-				
-				if(ipStringAddress.length() == 0){
-					JOptionPane.showMessageDialog(null, "[ERR] IP를 입력해주세요");
-					return;
-				}
-					
-				String[] ipSplit = ipStringAddress.split("\\.");
-				
-				byte[] ipAddress = new byte[4];
-				for(int i = 0; i < 4; i++)
-					ipAddress[i] = (byte) (Integer.parseInt(ipSplit[i]) & 0xff);
+				byte[] ipAddress = Address.ip(AddressPanel.dstIPAddress.getText());
+				if(ipAddress == null) return;
 				
 				ARPLayer arp = ((ARPLayer)layerManager.GetLayer("ARP"));
 				
