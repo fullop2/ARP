@@ -411,15 +411,22 @@ public class ARPLayer implements BaseLayer {
 	 * author : 박태현
 	 */
 	
-	private boolean addARPCache(byte[] ip, byte[] ethernet) {
+	private boolean addARPCache(byte[] ipAddr, byte[] ethe) {
 		
+		byte[] ip = new byte[4];
+		System.arraycopy(ipAddr, 0, ip, 0, 4);
+		
+		byte[] ethernet = new byte[6];
+		System.arraycopy(ethe, 0, ethernet, 0, 6);
 		Iterator<ARPCache> iter = arpCacheTable.iterator();
 		
 		byte[] deletedEthernet = null;
 		while(iter.hasNext()) {
 			ARPCache cache = iter.next();
 			if(Arrays.equals(cache.ip.addr,ip)) {
-				deletedEthernet = cache.ethernet.addr;
+				printARPInfo("Remove Cache", cache.ip.addr, cache.ethernet.addr);
+				deletedEthernet = new byte[6];
+				System.arraycopy(cache.ethernet.addr, 0, deletedEthernet, 0, 6);
 				iter.remove();
 				break;
 			}
@@ -427,6 +434,15 @@ public class ARPLayer implements BaseLayer {
 		if(isNIL(ethernet) && !isNIL(deletedEthernet))
 			ethernet = deletedEthernet;
 		arpCacheTable.add(new ARPCache(ip,ethernet));
+		
+		iter = arpCacheTable.iterator();
+		while(iter.hasNext()) {
+			ARPCache cache = iter.next();
+			byte[] eth = cache.ethernet.addr;
+			byte[] ipp = cache.ip.addr;
+			if(eth == null) eth = new byte[6];
+			printARPInfo("ARP Cache", ipp, eth);
+		}
 		updateARPCachePanel();
 		return true;
 	}

@@ -32,6 +32,7 @@ public class GARPEventHandlers implements EventHandlers {
 				
 				EthernetLayer ethernetLayer = ((EthernetLayer)layerManager.GetLayer("Ethernet"));
 				
+				ethernetLayer.setSrcEthernetAddress(macAddress);
 				ethernetLayer.setDstEthernetAddress(Address.ETH_BROADCAST);
 				ethernetLayer.setEthernetType(Address.ETH_TYPE_ARP);
 				

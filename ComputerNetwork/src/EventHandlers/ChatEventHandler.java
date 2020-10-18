@@ -56,6 +56,7 @@ public class ChatEventHandler implements EventHandlers {
 				
 				EthernetLayer ethernetLayer = ((EthernetLayer)layerManager.GetLayer("Ethernet"));
 				ethernetLayer.setEthernetType(Address.ETH_TYPE_IP);
+				ethernetLayer.setDstEthernetAddress(ethernetAddress);
 				
 				IPLayer ip = ((IPLayer)layerManager.GetLayer("IP"));
 				ip.setIPDstAddr(ipAddress);
@@ -74,6 +75,7 @@ public class ChatEventHandler implements EventHandlers {
 					nickname = "Anonymous".getBytes();
 				
 				chatAppLayer.setNickname(nickname);
+				
 				chatAppLayer.Send(byteMsg,byteMsg.length);
 			}
 		});
@@ -86,8 +88,8 @@ public class ChatEventHandler implements EventHandlers {
 		System.arraycopy(nickname, 0, nickName, 0, nickNameLen);
 		str.append(new String(nickName).trim()+" ");
 		for(int i = 0; i < 3; i++)
-			str.append(ip[i]+".");
-		str.append(ip[3]+"] : ");
+			str.append((int)(ip[i] & 0xff)+".");
+		str.append((int)(ip[3] & 0xff)+"] : ");
 		str.append(new String(msg)+"\n");
 		
 		ChatPanel.chattingArea.append(str.toString());
