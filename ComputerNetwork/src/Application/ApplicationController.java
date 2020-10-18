@@ -49,10 +49,5 @@ public class ApplicationController {
 			eventHandlers.setEventHandlers(layerManager);
 		}
 	}
-		
-
-	public static void receiveMsg(String msg) {
-		ChatPanel.chattingArea.append("[RECV] : " + msg + "\n");
-	}
 }
 
