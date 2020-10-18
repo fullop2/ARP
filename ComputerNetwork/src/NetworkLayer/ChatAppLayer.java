@@ -57,7 +57,7 @@ public class ChatAppLayer implements BaseLayer{
            
 	public boolean Receive(byte[] input){
 		
-		ChatEventHandler.receiveMsg(new String(input));
+		ChatEventHandler.printMsg(new String(input));
 		return true;
 	}	 
 

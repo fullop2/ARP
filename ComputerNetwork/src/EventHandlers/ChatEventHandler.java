@@ -62,16 +62,14 @@ public class ChatEventHandler implements EventHandlers {
 				TCPLayer tcpLayer =  ((TCPLayer)layerManager.GetLayer("TCP"));
 				tcpLayer.setPort(Address.APP_PORT_CHAT);	
 				
-				/* Send Msg */
-				ChatPanel.chattingArea.append("[SEND] : "+msg+"\n");			
+				/* Send Msg */		
 				ChatAppLayer chatAppLayer = ((ChatAppLayer)layerManager.GetLayer("Chat"));
 				chatAppLayer.Send(byteMsg,byteMsg.length);
 			}
 		});
 	}
 
-	public static void receiveMsg(String msg) {
-		ChatPanel.chattingArea.append("[RECV] : " + msg + "\n");
+	public static void printMsg(String msg) {
+		ChatPanel.chattingArea.append(msg);
 	}
-
 }
