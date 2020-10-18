@@ -34,7 +34,7 @@ public class ARPLayer implements BaseLayer {
 			setEthernet(ethernet);
 			setIp(ip);
 			
-			if(isNIL(ethernet))
+			if(ethernet == null || isNIL(ethernet))
 				setTimeToLive(180000);
 			else
 				setTimeToLive(1200000);
