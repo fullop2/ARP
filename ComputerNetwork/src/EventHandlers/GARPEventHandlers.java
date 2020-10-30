@@ -32,6 +32,7 @@ public class GARPEventHandlers implements EventHandlers {
 				
 				EthernetLayer ethernetLayer = ((EthernetLayer)layerManager.GetLayer("Ethernet"));
 				
+				ethernetLayer.setSrcEthernetAddress(macAddress);
 				ethernetLayer.setDstEthernetAddress(Address.ETH_BROADCAST);
 				ethernetLayer.setEthernetType(Address.ETH_TYPE_ARP);
 				
@@ -43,6 +44,8 @@ public class GARPEventHandlers implements EventHandlers {
 				arpLayer.setEthernetSenderAddress(macAddress);
 				arpLayer.setEthernetTargetAddress(Address.ETH_NIL);
 				// no info for tcp,ip
+				
+				AddressPanel.srcMacAddress.setText(GARPPanel.GARPMacAddr.getText());
 				
 				// app
 				ARPAppLayer arpAppLayer = ((ARPAppLayer)layerManager.GetLayer("ARPA"));			
